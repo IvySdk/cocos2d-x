@@ -1,0 +1,6 @@
+/assets
+obj
+*.apk
+gen
+/*.md
+
