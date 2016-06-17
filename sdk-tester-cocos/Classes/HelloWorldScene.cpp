@@ -38,6 +38,36 @@ void onFreecoinResult(int coins) {
 	CCLOG("I get %i coins", coins);
 }
 
+void onReceiveSNSResult(int resultType, bool success, int extra) {
+    switch(resultType) {
+        case IvySDK::SNS_RESULT_LOGIN:
+            if (success) {
+                // now do your login logic, get profile, friends etc.
+                const char* mestring = IvySDK::me();
+                CCLOG("me string is %s", mestring);
+            }
+            break;
+            
+        case IvySDK::SNS_RESULT_LIKE:
+            if (success) {
+                CCLOG("thank you for like us.");
+            }
+            break;
+            
+        case IvySDK::SNS_RESULT_INVITE:
+            if (success) {
+                CCLOG("thank you invite your friends. you will receive 10 golds.");
+            }
+            break;
+            
+        case IvySDK::SNS_RESULT_CHALLENGE:
+            if (extra > 3) {
+                CCLOG("thank you challenge 3 friends, you will receive 10 golds.");
+            }
+            break;
+    }
+}
+
 /////////////////////////////////////////////////////////
 
 Scene* HelloWorld::scene() {
@@ -65,6 +95,7 @@ bool HelloWorld::init() {
 	CCMenuItemFont::setFontSize(11);
 	IvySDK::registerPaymentCallback(onPaymentResult);
 	IvySDK::registerFreecoinCallback(onFreecoinResult);
+    IvySDK::registerSNSCallback(onReceiveSNSResult);
 
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	auto origin = Director::getInstance()->getVisibleOrigin();
@@ -86,97 +117,49 @@ bool HelloWorld::init() {
 	float px = origin.x + 40;
 
 	ccMenuCallback handler = CC_CALLBACK_1(HelloWorld::AdButtonClicked, this);
-
-	CCMenuItemFont *laber1 = CCMenuItemFont::create("Pause AD", handler);
-	laber1->setPosition(ccp(px, py));
-	laber1->setTag(1);
-	CCMenu *menu1 = CCMenu::create(laber1, NULL);
-	menu1->setPosition(CCPointZero);
-	addChild(menu1, 3);
-
-	laber1 = CCMenuItemFont::create("PassLevel AD", handler);
-	laber1->setPosition(ccp(px, py - 40));
-	laber1->setTag(2);
-	menu1 = CCMenu::create(laber1, NULL);
-	menu1->setPosition(CCPointZero);
-	addChild(menu1, 3);
-
-	laber1 = CCMenuItemFont::create("Custom AD", handler);
-	laber1->setPosition(ccp(px, py - 80));
-	laber1->setTag(3);
-	menu1 = CCMenu::create(laber1, NULL);
-	menu1->setPosition(CCPointZero);
-	addChild(menu1, 3);
-
-	laber1 = CCMenuItemFont::create("Exit AD", handler);
-	laber1->setPosition(ccp(px, py - 120));
-	laber1->setTag(4);
-	menu1 = CCMenu::create(laber1, NULL);
-	menu1->setPosition(CCPointZero);
-	addChild(menu1, 3);
-
-	laber1 = CCMenuItemFont::create("Banner AD", handler);
-	laber1->setPosition(ccp(px, py - 160));
-	laber1->setTag(5);
-	menu1 = CCMenu::create(laber1, NULL);
-	menu1->setPosition(CCPointZero);
-	addChild(menu1, 3);
-
-	laber1 = CCMenuItemFont::create("Close Banner", handler);
-	laber1->setPosition(ccp(px + 100, py));
-	laber1->setTag(6);
-	menu1 = CCMenu::create(laber1, NULL);
-	menu1->setPosition(CCPointZero);
-	addChild(menu1, 3);
-
-	laber1 = CCMenuItemFont::create("share", handler);
-	laber1->setPosition(ccp(px + 100, py - 40));
-	laber1->setTag(7);
-	menu1 = CCMenu::create(laber1, NULL);
-	menu1->setPosition(CCPointZero);
-	addChild(menu1, 3);
-
-	laber1 = CCMenuItemFont::create("More Game", handler);
-	laber1->setPosition(ccp(px + 100, py - 80));
-	laber1->setTag(8);
-	menu1 = CCMenu::create(laber1, NULL);
-	menu1->setPosition(CCPointZero);
-	addChild(menu1, 3);
-
-	laber1 = CCMenuItemFont::create("Free Coin", handler);
-	laber1->setPosition(ccp(px + 100, py - 120));
-	laber1->setTag(9);
-	menu1 = CCMenu::create(laber1, NULL);
-	menu1->setPosition(CCPointZero);
-	addChild(menu1, 3);
-
-	laber1 = CCMenuItemFont::create("Do billing", handler);
-	laber1->setPosition(ccp(px + 100, py - 160));
-	laber1->setTag(10);
-	menu1 = CCMenu::create(laber1, NULL);
-	menu1->setPosition(CCPointZero);
-	addChild(menu1, 3);
+    const int label_size = 21;
+    const char* labels[label_size] = {
+        "Pause AD", // 1
+        "PassLevel",// 2
+        "Custom", // 3
+        "Exit AD",// 4
+        "Banner",// 5
+        "Close Banner",// 6
+        "Share", // 7
+        "MoreGame", // 8
+        "Freecoin", // 9
+        "Pay", // 10
+        "Get Data", // 11
+        "Track Event", // 12
+        "Rate", //13
+        "login", // 14
+        "logout", // 15
+        "isLogin",// 16
+        "Like", // 17
+        "Challenge", // 18
+        "Me", // 19
+        "Friends", // 20
+        "Invite" // 21
+    };
     
-    laber1 = CCMenuItemFont::create("getData", handler);
-    laber1->setPosition(ccp(px + 200, py));
-    laber1->setTag(11);
-    menu1 = CCMenu::create(laber1, NULL);
-    menu1->setPosition(CCPointZero);
-    addChild(menu1, 3);
+    int xOffset = 0;
+    int yOffset = 0;
     
-    laber1 = CCMenuItemFont::create("track event", handler);
-    laber1->setPosition(ccp(px + 200, py - 40));
-    laber1->setTag(12);
-    menu1 = CCMenu::create(laber1, NULL);
-    menu1->setPosition(CCPointZero);
-    addChild(menu1, 3);
-
-    laber1 = CCMenuItemFont::create("rate us", handler);
-    laber1->setPosition(ccp(px + 200, py - 80));
-    laber1->setTag(13);
-    menu1 = CCMenu::create(laber1, NULL);
-    menu1->setPosition(CCPointZero);
-    addChild(menu1, 3);
+    for(int i=0; i<label_size; ++i) {
+        CCMenuItemFont *laber1 = CCMenuItemFont::create(labels[i], handler);
+        laber1->setPosition(ccp(px + xOffset, py - yOffset));
+        laber1->setTag(i+1);
+        CCMenu *menu1 = CCMenu::create(laber1, NULL);
+        menu1->setPosition(CCPointZero);
+        addChild(menu1, 3);
+        
+        yOffset += 40;
+        if (yOffset > 200) {
+            xOffset += 100;
+            yOffset = 0;
+        }
+    }
+    
 	return true;
 }
 
@@ -225,6 +208,39 @@ void HelloWorld::AdButtonClicked(Ref* ref) {
         case 13:
             IvySDK::rateUs();
             break;
+            
+        case 14:
+            IvySDK::login();
+            break;
+            
+        case 15:
+            IvySDK::logout();
+            break;
+            
+        case 16:
+            CCLOG("isLogin: %s", IvySDK::isLogin() ? "true": "false");
+            break;
+            
+        case 17:
+            IvySDK::like();
+            break;
+            
+        case 18:
+            IvySDK::challenge("wa challenge", "speed come with me");
+            break;
+            
+        case 19:
+            CCLOG("me is %s", IvySDK::me());
+            break;
+            
+        case 20:
+            CCLOG("friends are: %s", IvySDK::friends());
+            break;
+            
+        case 21:
+            IvySDK::invite();
+            break;
+            
 	default:
 		break;
 	}

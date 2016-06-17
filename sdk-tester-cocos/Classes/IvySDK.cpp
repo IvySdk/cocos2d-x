@@ -4,6 +4,7 @@
 namespace IvySDK {
     onPaymentResult paymentCallback_;
     onFreecoinResult freeCoinCallback_;
+    onSNSResult snsCallback_;
 }
 #ifdef __cplusplus
 extern "C" {
@@ -23,6 +24,13 @@ extern "C" {
         CCLOG("receive free coins");
         if (IvySDK::freeCoinCallback_ != 0)
             IvySDK::freeCoinCallback_(rewardId);
+    }
+    
+    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_sns(JNIEnv* env, jclass clazz, jint msg, jboolean success, jint extra){
+        CCLOG("receive sns message: %d, result: %d", msg, success? 1 : 0);
+        if (IvySDK::snsCallback_ != 0) {
+            IvySDK::snsCallback_(msg, success, extra);
+        }
     }
 #ifdef __cplusplus
 }

@@ -12,6 +12,7 @@ namespace IvySDK
 {
     typedef void (*onPaymentResult)(int resultCode, int billId);
     typedef void (*onFreecoinResult)(int rewardId);
+    typedef void (*onSNSResult)(int msg, bool success, int extra);
     
     static const int AD_POS_LEFT_TOP = 1;
     static const int AD_POS_MIDDLE_TOP = 3;
@@ -30,11 +31,64 @@ namespace IvySDK
     static const int PAYMENT_RESULT_CANCEL = 1;
     static const int PAYMENT_RESULT_FAILURE = 2;
     
+    static const int SNS_RESULT_LOGIN = 1;
+    static const int SNS_RESULT_INVITE = 2;
+    static const int SNS_RESULT_CHALLENGE = 3;
+    static const int SNS_RESULT_LIKE = 4;
+    
     #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
     static const char* sdkClassName_ = "com/risesdk/client/Cocos";
     extern onPaymentResult paymentCallback_;
     extern onFreecoinResult freeCoinCallback_;
+    extern onSNSResult snsCallback_;
     #endif
+    
+    static void callVoidMethod(const char* method) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, method, "()V"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return;
+        }
+        methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+#endif
+    }
+    
+    static bool callBooleanMethod(const char* method) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, method, "()Z"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return false;
+        }
+        bool result = methodInfo.env->CallStaticBooleanMethod(methodInfo.classID, methodInfo.methodID);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        return result;
+#else
+        return false;
+#endif
+    }
+    
+    static const char* callUTFMethod(const char* method, const char* def) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, method, "()Ljava/lang/String;"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return "{}";
+        }
+        jstring result = (jstring)methodInfo.env->CallStaticObjectMethod(methodInfo.classID, methodInfo.methodID);
+        const char* cs = methodInfo.env->GetStringUTFChars(result, 0);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(result);
+        return cs;
+#else
+        return def;
+#endif
+    }
 
     static void showInterstitial(const char* pos)
     {
@@ -68,44 +122,17 @@ namespace IvySDK
 
     static void closeBanner()
     {
-        #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-        JniMethodInfo methodInfo;
-		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "closeBanner", "()V"))
-		{
-			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
-			return;
-		}
-		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID);
-		methodInfo.env->DeleteLocalRef(methodInfo.classID);
-    	#endif
+        callVoidMethod("closeBanner");
     }
 
     static void onQuit()
     {
-        #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-        JniMethodInfo methodInfo;
-        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "onQuit", "()V"))
-        {
-            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
-            return;
-        }
-        methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID);
-        methodInfo.env->DeleteLocalRef(methodInfo.classID);
-        #endif
+        callVoidMethod("onQuit");
     }
 
     static void showMoreGame()
     {
-        #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-        JniMethodInfo methodInfo;
-		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "moreGame", "()V"))
-		{
-			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
-			return;
-		}
-		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID);
-		methodInfo.env->DeleteLocalRef(methodInfo.classID);
-    	#endif
+        callVoidMethod("moreGame");
     }
     
     static void showFreeCoin(int rewardId)
@@ -124,19 +151,7 @@ namespace IvySDK
     
     static bool hasFreeCoin()
     {
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-        JniMethodInfo methodInfo;
-        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "hasRewardAd", "()Z"))
-        {
-            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
-            return false;
-        }
-        bool result = methodInfo.env->CallStaticBooleanMethod(methodInfo.classID, methodInfo.methodID);
-        methodInfo.env->DeleteLocalRef(methodInfo.classID);
-        return result;
-#else
-        return false;
-#endif
+        return callBooleanMethod("hasRewardAd");
     }
     
     static void trackEvent(const char* category, const char* action, const char* label, int value) {
@@ -160,16 +175,7 @@ namespace IvySDK
     
     static void share()
     {
-        #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-        JniMethodInfo methodInfo;
-		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "share", "()V"))
-		{
-			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
-			return;
-		}
-		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID);
-		methodInfo.env->DeleteLocalRef(methodInfo.classID);
-    	#endif
+        callVoidMethod("share");
     }
 
     static void doBilling(int billingId)
@@ -187,35 +193,58 @@ namespace IvySDK
     }
     
     static void rateUs() {
+        callVoidMethod("rate");
+    }
+    
+    static const char* getExtraData() {
+        return callUTFMethod("getExtraData", "{}");
+    }
+    
+    static void login() {
+        callVoidMethod("login");
+    }
+    
+    static void logout() {
+        callVoidMethod("logout");
+    }
+    
+    static bool isLogin() {
+        return callBooleanMethod("isLogin");
+    }
+    
+    static void invite() {
+        callVoidMethod("invite");
+    }
+    
+    static void challenge(const char* title, const char* message) {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
         JniMethodInfo methodInfo;
-        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "rate", "()V"))
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "challenge", "(Ljava/lang/String;Ljava/lang/String;)V"))
         {
             CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
             return;
         }
-        methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID);
+        jstring c = methodInfo.env->NewStringUTF(title);
+        jstring a = methodInfo.env->NewStringUTF(message);
+        methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, c, a);
         methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(c);
+        methodInfo.env->DeleteLocalRef(a);
 #endif
     }
     
-    static const char* getExtraData() {
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-        JniMethodInfo methodInfo;
-        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "getExtraData", "()Ljava/lang/String;"))
-        {
-            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
-            return "{}";
-        }
-        jstring result = (jstring)methodInfo.env->CallStaticObjectMethod(methodInfo.classID, methodInfo.methodID);
-        const char* cs = methodInfo.env->GetStringUTFChars(result, 0);
-        methodInfo.env->DeleteLocalRef(methodInfo.classID);
-        methodInfo.env->DeleteLocalRef(result);
-        return cs;
-#else
-        return "{}";
-#endif
+    static void like() {
+        callVoidMethod("like");
     }
+    
+    static const char* me() {
+        return callUTFMethod("me", "{}");
+    }
+    
+    static const char* friends() {
+        return callUTFMethod("friends", "[]");
+    }
+    
     
     static void registerPaymentCallback(onPaymentResult callback)
     {
@@ -230,6 +259,13 @@ namespace IvySDK
         freeCoinCallback_ = callback;
         #endif
     }
+    
+    static void registerSNSCallback(onSNSResult callback)
+    {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        snsCallback_ = callback;
+#endif
+    }
 }
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
@@ -240,6 +276,7 @@ extern "C"
     JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_pr(JNIEnv* env, jclass clazz, jint billingId, jboolean success);
     JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_pv(JNIEnv* env, jclass clazz);
     JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_rr(JNIEnv* env, jclass clazz, jint rewardId);
+    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_sns(JNIEnv* env, jclass clazz, jint msg, jboolean success, jint result);
 #ifdef __cplusplus
 }
 #endif

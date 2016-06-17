@@ -3,4 +3,5 @@ obj
 *.apk
 gen
 /*.md
+out/
 
