@@ -1,5 +1,5 @@
 # RiseSDK for cocos2d-x
-1, Copy files and init in Activity
+###### 1, Copy files and init in Activity
 
 * copy Classes and proj.android to your Cocos2d-x project folder corresponding
 -- before:
@@ -52,10 +52,10 @@
 }
 ```
 
-2, add IvySDK.cpp to your Android.mk file
+###### 2, add IvySDK.cpp to your Android.mk file
 ![add src](assets/risesdk-cocos-f91ad.png)
 
-3, ADs
+###### 3, ADs
 call these functions when you want
 ```c++
 //show pass level full screen ad when you want
@@ -89,7 +89,7 @@ IvySDK::trackEvent("your category", "your action", "your label", 1);
 const char* data = IvySDK::getExtraData();
 ```
 
-4, In-App Billing
+###### 4, In-App Billing
 When you want to use IAP, you should do this:
 * register your payment callback
 ```c++
@@ -137,7 +137,7 @@ bool HelloWorld::init() {
 IvySDK::doBilling(BILLING_ID_ACTIVE_GAME);
 ```
 
-5, when you want to use reward ad, you should do this:
+###### 5, when you want to use reward ad, you should do this:
 * register your reward ad callback
 ```c++
 #define REWARD_ID_GOLD 1
@@ -178,7 +178,7 @@ bool has = IvySDK::hasFreeCoin();
 if (has)...
 ```
 
-6, SNS
+###### 6, SNS
 When you want to use SNS, you should do this:
 * define sns callback and register it
 ```js
@@ -246,7 +246,7 @@ const char* profileString = IvySDK::me();
 const char* friendString = IvySDK::friends();
 ```
 
-7, Leaderboard
+###### 7, Leaderboard
 When you want to use leaderboard, you should do this:
 * Define leaderboard call back
 ```js
@@ -287,5 +287,23 @@ IvySDK::loadFriendLeaderBoard("endless", 0, 20, "firend_id1,friend_id2");
 IvySDK::loadGlobalLeaderBoard("endless", 0, 20);
 ```
 
-8, Congratulations, done. You will see some toasts when you run your game in your android phone or emulator:
+###### 8, NativeAds
+When you want to show some ads in your loading stage or pause game stage, you can use this type of ad. This Ad will show in screen position that measured by percentage of the screen height that you want. see blow:
+```js
+// show native ad in screen with y position of 80 percent of screen height
+IvySDK::showNativeAd("loading", 80);
+
+// hide native ad when you pass the loading stage
+IvySDK::hideNativeAd("loading");
+
+// you can check is there exists any native ad
+if (IvySDK::hasNativeAd("loading")) {
+  // show loading stage with native ad
+} else {
+  // show loading stage without native ad
+}
+```
+
+###### 9, Congratulations, done.
+ You will see some toasts when you run your game in your android phone or emulator:
 <center>![toast](assets/risesdk-cocos-a0e84.png)</center>
