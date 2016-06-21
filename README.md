@@ -137,7 +137,8 @@ bool HelloWorld::init() {
 IvySDK::doBilling(BILLING_ID_ACTIVE_GAME);
 ```
 
-###### 5, when you want to use reward ad, you should do this:
+###### 5, Reward AD
+when you want to use reward ad, you should do this:
 * register your reward ad callback
 ```c++
 #define REWARD_ID_GOLD 1
