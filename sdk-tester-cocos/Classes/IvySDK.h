@@ -13,6 +13,7 @@ namespace IvySDK
     typedef void (*onPaymentResult)(int resultCode, int billId);
     typedef void (*onFreecoinResult)(int rewardId);
     typedef void (*onSNSResult)(int msg, bool success, int extra);
+    typedef void (*onLeaderBoardResult)(bool submit, bool success, const char* leaderBoardId, const char* data);
     
     static const int AD_POS_LEFT_TOP = 1;
     static const int AD_POS_MIDDLE_TOP = 3;
@@ -41,6 +42,7 @@ namespace IvySDK
     extern onPaymentResult paymentCallback_;
     extern onFreecoinResult freeCoinCallback_;
     extern onSNSResult snsCallback_;
+    extern onLeaderBoardResult leaderBoardCallback_;
     #endif
     
     static void callVoidMethod(const char* method) {
@@ -123,6 +125,54 @@ namespace IvySDK
     static void closeBanner()
     {
         callVoidMethod("closeBanner");
+    }
+    
+    static bool hasNativeAd(const char* nativeTag) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "hasNative", "(Ljava/lang/String;)V"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return false;
+        }
+        jstring tag = methodInfo.env->NewStringUTF(nativeTag);
+        bool result = methodInfo.env->CallStaticBooleanMethod(methodInfo.classID, methodInfo.methodID, tag);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(tag);
+        return result;
+#else
+        return false;
+#endif
+    }
+    
+    static void showNativeAd(const char* nativeTag, int yPercent) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "showNative", "(Ljava/lang/String;I)V"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return;
+        }
+        jstring tag = methodInfo.env->NewStringUTF(nativeTag);
+        methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, tag, yPercent);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(tag);
+#endif
+    }
+    
+    static void hideNativeAd(const char* nativeTag) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "hideNative", "(Ljava/lang/String;)V"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return;
+        }
+        jstring tag = methodInfo.env->NewStringUTF(nativeTag);
+        methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, tag);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(tag);
+#endif
     }
 
     static void onQuit()
@@ -245,6 +295,54 @@ namespace IvySDK
         return callUTFMethod("friends", "[]");
     }
     
+    static void submitScore(const char* leaderBoardId, int score, const char* extra) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "submitScore", "(Ljava/lang/String;ILjava/lang/String;)V"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return;
+        }
+        jstring c = methodInfo.env->NewStringUTF(leaderBoardId);
+        jstring a = methodInfo.env->NewStringUTF(extra);
+        methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, c, score, a);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(c);
+        methodInfo.env->DeleteLocalRef(a);
+#endif
+    }
+    
+    static void loadFriendLeaderBoard(const char* leaderBoardId, int start, int end, const char* friends) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "loadLeaderBoard", "(Ljava/lang/String;IILjava/lang/String;)V"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return;
+        }
+        jstring c = methodInfo.env->NewStringUTF(leaderBoardId);
+        jstring a = methodInfo.env->NewStringUTF(friends);
+        methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, c, start, end, a);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(c);
+        methodInfo.env->DeleteLocalRef(a);
+#endif
+    }
+    
+    static void loadGlobalLeaderBoard(const char* leaderBoardId, int start, int end) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "loadGlobalLeaderBoard", "(Ljava/lang/String;II)V"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return;
+        }
+        jstring c = methodInfo.env->NewStringUTF(leaderBoardId);
+        methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, c, start, end);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(c);
+#endif
+    }
     
     static void registerPaymentCallback(onPaymentResult callback)
     {
@@ -266,6 +364,13 @@ namespace IvySDK
         snsCallback_ = callback;
 #endif
     }
+    
+    static void registerLeaderBoardCallback(onLeaderBoardResult callback)
+    {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        leaderBoardCallback_ = callback;
+#endif
+    }
 }
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
@@ -277,6 +382,7 @@ extern "C"
     JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_pv(JNIEnv* env, jclass clazz);
     JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_rr(JNIEnv* env, jclass clazz, jint rewardId);
     JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_sns(JNIEnv* env, jclass clazz, jint msg, jboolean success, jint result);
+    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_lb(JNIEnv* env, jclass clazz, jboolean submit, jboolean success, jstring leaderBoardId, jstring ex);
 #ifdef __cplusplus
 }
 #endif

@@ -5,6 +5,7 @@ namespace IvySDK {
     onPaymentResult paymentCallback_;
     onFreecoinResult freeCoinCallback_;
     onSNSResult snsCallback_;
+    onLeaderBoardResult leaderBoardCallback_;
 }
 #ifdef __cplusplus
 extern "C" {
@@ -30,6 +31,17 @@ extern "C" {
         CCLOG("receive sns message: %d, result: %d", msg, success? 1 : 0);
         if (IvySDK::snsCallback_ != 0) {
             IvySDK::snsCallback_(msg, success, extra);
+        }
+    }
+    
+    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_lb(JNIEnv* env, jclass clazz, jboolean submit, jboolean success, jstring leaderBoardId, jstring extra){
+        CCLOG("receive leader board message: %s, result: %d", submit ? "submit" : "load", success? 1 : 0);
+        if (IvySDK::leaderBoardCallback_ != 0) {
+            const char* id = env->GetStringUTFChars(leaderBoardId, 0);
+            env->DeleteLocalRef(leaderBoardId);
+            const char* ex = env->GetStringUTFChars(extra, 0);
+            env->DeleteLocalRef(extra);
+            IvySDK::leaderBoardCallback_(submit, success, id, ex);
         }
     }
 #ifdef __cplusplus

@@ -1,7 +1,5 @@
-/assets
 obj
 *.apk
 gen
-/*.md
 out/
 

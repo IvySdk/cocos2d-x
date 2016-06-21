@@ -68,6 +68,23 @@ void onReceiveSNSResult(int resultType, bool success, int extra) {
     }
 }
 
+void onReceiveLeaderboardResult(bool submit, bool success, const char* leaderBoardId, const char* data)
+{
+    if (submit) {
+        if (success) {
+            CCLOG("submit score to %s success", leaderBoardId);
+        } else {
+            CCLOG("submit score to %s fails", leaderBoardId);
+        }
+    } else {
+        if (success) {
+            CCLOG("load leader board %s success; data is %s", leaderBoardId, data);
+        } else {
+            CCLOG("load leader board %s fails", leaderBoardId);
+        }
+    }
+}
+
 /////////////////////////////////////////////////////////
 
 Scene* HelloWorld::scene() {
@@ -96,6 +113,7 @@ bool HelloWorld::init() {
 	IvySDK::registerPaymentCallback(onPaymentResult);
 	IvySDK::registerFreecoinCallback(onFreecoinResult);
     IvySDK::registerSNSCallback(onReceiveSNSResult);
+    IvySDK::registerLeaderBoardCallback(onReceiveLeaderboardResult);
 
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	auto origin = Director::getInstance()->getVisibleOrigin();
@@ -117,7 +135,7 @@ bool HelloWorld::init() {
 	float px = origin.x + 40;
 
 	ccMenuCallback handler = CC_CALLBACK_1(HelloWorld::AdButtonClicked, this);
-    const int label_size = 21;
+    const int label_size = 26;
     const char* labels[label_size] = {
         "Pause AD", // 1
         "PassLevel",// 2
@@ -139,7 +157,12 @@ bool HelloWorld::init() {
         "Challenge", // 18
         "Me", // 19
         "Friends", // 20
-        "Invite" // 21
+        "Invite", // 21
+        "Submit", //22
+        "Load Leader Board", //23
+        "Load global", //24
+        "Show Native", //25,
+        "Hide Native" //26
     };
     
     int xOffset = 0;
@@ -239,6 +262,26 @@ void HelloWorld::AdButtonClicked(Ref* ref) {
             
         case 21:
             IvySDK::invite();
+            break;
+            
+        case 22:
+            IvySDK::submitScore("endless", 320, "");
+            break;
+            
+        case 23:
+            IvySDK::loadFriendLeaderBoard("endless", 0, 20, "");
+            break;
+            
+        case 24:
+            IvySDK::loadGlobalLeaderBoard("endless", 0, 20);
+            break;
+            
+        case 25:
+            IvySDK::showNativeAd("lock_pre", 80);
+            break;
+            
+        case 26:
+            IvySDK::hideNativeAd("lock_pre");
             break;
             
 	default:
