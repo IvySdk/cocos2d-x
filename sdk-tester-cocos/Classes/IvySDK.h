@@ -11,9 +11,10 @@ using namespace cocos2d;
 namespace IvySDK
 {
     typedef void (*onPaymentResult)(int resultCode, int billId);
-    typedef void (*onFreecoinResult)(int rewardId);
+    typedef void (*onFreecoinResult)(bool success, int rewardId);
     typedef void (*onSNSResult)(int msg, bool success, int extra);
-    typedef void (*onLeaderBoardResult)(bool submit, bool success, const char* leaderBoardId, const char* data);
+    typedef void (*onLeaderBoardResult)(bool isSubmit, bool success, const char* leaderBoardId, const char* data);
+    typedef void (*onServerResult)(int resultCode, bool success, const char* data);
     
     static const int AD_POS_LEFT_TOP = 1;
     static const int AD_POS_MIDDLE_TOP = 3;
@@ -37,12 +38,19 @@ namespace IvySDK
     static const int SNS_RESULT_CHALLENGE = 3;
     static const int SNS_RESULT_LIKE = 4;
     
+    static const int SERVER_RESULT_RECEIVE_GAME_DATA = 1;
+    static const int SERVER_RESULT_SAVE_USER_DATA = 2;
+    static const int SERVER_RESULT_RECEIVE_USER_DATA = 3;
+    static const int SERVER_RESULT_VERIFY_CODE = 4;
+    static const int SERVER_RESULT_SALES_CLICK = 5;
+    
     #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
     static const char* sdkClassName_ = "com/risesdk/client/Cocos";
     extern onPaymentResult paymentCallback_;
     extern onFreecoinResult freeCoinCallback_;
     extern onSNSResult snsCallback_;
     extern onLeaderBoardResult leaderBoardCallback_;
+    extern onServerResult serverCallback_;
     #endif
     
     static void callVoidMethod(const char* method) {
@@ -89,6 +97,19 @@ namespace IvySDK
         return cs;
 #else
         return def;
+#endif
+    }
+    
+    static void callVoidIntMethod(const char* method, int param) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, method, "(I)V"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return;
+        }
+        methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, param);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
 #endif
     }
 
@@ -187,16 +208,7 @@ namespace IvySDK
     
     static void showFreeCoin(int rewardId)
     {
-        #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-        JniMethodInfo methodInfo;
-		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "showRewardAd", "(I)V"))
-		{
-			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
-			return;
-		}
-		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, rewardId);
-		methodInfo.env->DeleteLocalRef(methodInfo.classID);
-    	#endif
+        callVoidIntMethod("showRewardAd", rewardId);
     }
     
     static bool hasFreeCoin()
@@ -230,16 +242,7 @@ namespace IvySDK
 
     static void doBilling(int billingId)
     {
-        #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-        JniMethodInfo methodInfo;
-		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "pay", "(I)V"))
-		{
-			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
-			return;
-		}
-		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, billingId);
-		methodInfo.env->DeleteLocalRef(methodInfo.classID);
-    	#endif
+        callVoidIntMethod("pay", billingId);
     }
     
     static void rateUs() {
@@ -344,6 +347,48 @@ namespace IvySDK
 #endif
     }
     
+    static void loadGameData(int version) {
+        callVoidIntMethod("loadExtra", version);
+    }
+    
+    static void showSales(int saleId) {
+        callVoidIntMethod("showSales", saleId);
+    }
+    
+    static void verifyCode(const char* code) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "verifyCode", "(Ljava/lang/String;)V"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return;
+        }
+        jstring tag = methodInfo.env->NewStringUTF(code);
+        methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, tag);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(tag);
+#endif
+    }
+    
+    static void loadUserData() {
+        callVoidMethod("loadData");
+    }
+    
+    static void saveUserData(const char* data) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "saveData", "(Ljava/lang/String;)V"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return;
+        }
+        jstring tag = methodInfo.env->NewStringUTF(data);
+        methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, tag);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(tag);
+#endif
+    }
+    
     static void registerPaymentCallback(onPaymentResult callback)
     {
         #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
@@ -371,6 +416,13 @@ namespace IvySDK
         leaderBoardCallback_ = callback;
 #endif
     }
+    
+    static void registerServerCallback(onServerResult callback)
+    {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        serverCallback_ = callback;
+#endif
+    }
 }
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
@@ -378,11 +430,12 @@ namespace IvySDK
 extern "C" 
 {
 #endif
-    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_pr(JNIEnv* env, jclass clazz, jint billingId, jboolean success);
+    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_pr(JNIEnv* env, jclass clazz, jint billingId, jint status);
     JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_pv(JNIEnv* env, jclass clazz);
-    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_rr(JNIEnv* env, jclass clazz, jint rewardId);
+    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_rr(JNIEnv* env, jclass clazz, jboolean success, jint rewardId);
     JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_sns(JNIEnv* env, jclass clazz, jint msg, jboolean success, jint result);
     JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_lb(JNIEnv* env, jclass clazz, jboolean submit, jboolean success, jstring leaderBoardId, jstring ex);
+    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_sr(JNIEnv* env, jclass clazz, jint resultCode, jboolean success, jstring ex);
 #ifdef __cplusplus
 }
 #endif

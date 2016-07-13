@@ -34,8 +34,8 @@ void HelloWorld::onPaymentResult(int resultCode, int billingId) {
 	}
 }
 
-void onFreecoinResult(int coins) {
-	CCLOG("I get %i coins", coins);
+void onFreecoinResult(bool success, int coins) {
+    CCLOG("free coin: success? %s and I get %i coins", success? "true" : "false", coins);
 }
 
 void onReceiveSNSResult(int resultType, bool success, int extra) {
@@ -82,6 +82,33 @@ void onReceiveLeaderboardResult(bool submit, bool success, const char* leaderBoa
         } else {
             CCLOG("load leader board %s fails", leaderBoardId);
         }
+    }
+}
+
+void onReceiveServerResult(int resultCode, bool success, const char* data) {
+    switch(resultCode) {
+        case IvySDK::SERVER_RESULT_SALES_CLICK:
+            if (success) {
+                int saleId = atoi(data);
+                CCLOG("sales clicked here: id %d", saleId);
+                
+            }
+            break;
+            
+        case IvySDK::SERVER_RESULT_VERIFY_CODE:
+            if (success) {
+                CCLOG("verify code success");
+            } else {
+                CCLOG("verify code fails");
+            }
+            break;
+            
+        case IvySDK::SERVER_RESULT_RECEIVE_GAME_DATA:
+            if (success) {
+                CCLOG("game data is %s", data);
+                
+            }
+            break;
     }
 }
 
@@ -135,7 +162,7 @@ bool HelloWorld::init() {
 	float px = origin.x + 40;
 
 	ccMenuCallback handler = CC_CALLBACK_1(HelloWorld::AdButtonClicked, this);
-    const int label_size = 26;
+    const int label_size = 28;
     const char* labels[label_size] = {
         "Pause AD", // 1
         "PassLevel",// 2
@@ -162,7 +189,9 @@ bool HelloWorld::init() {
         "Load Leader Board", //23
         "Load global", //24
         "Show Native", //25,
-        "Hide Native" //26
+        "Hide Native", //26,
+        "show sales", //27
+        "load game data" //28
     };
     
     int xOffset = 0;
@@ -282,6 +311,14 @@ void HelloWorld::AdButtonClicked(Ref* ref) {
             
         case 26:
             IvySDK::hideNativeAd("lock_pre");
+            break;
+            
+        case 27:
+            IvySDK::showSales(2);
+            break;
+            
+        case 28:
+            IvySDK::loadGameData(1);
             break;
             
 	default:

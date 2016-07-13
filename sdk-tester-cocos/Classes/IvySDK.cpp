@@ -6,14 +6,15 @@ namespace IvySDK {
     onFreecoinResult freeCoinCallback_;
     onSNSResult snsCallback_;
     onLeaderBoardResult leaderBoardCallback_;
+    onServerResult serverCallback_;
 }
 #ifdef __cplusplus
 extern "C" {
 #endif
-    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_pr(JNIEnv* env, jclass clazz, jint billingId, jboolean success) {
+    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_pr(JNIEnv* env, jclass clazz, jint billingId, jint status) {
         CCLOG("payment result");
         if (IvySDK::paymentCallback_ != 0) {
-            IvySDK::paymentCallback_(success ? IvySDK::PAYMENT_RESULT_SUCCESS : IvySDK::PAYMENT_RESULT_FAILURE, billingId);
+            IvySDK::paymentCallback_(status, billingId);
         }
     }
     
@@ -21,10 +22,10 @@ extern "C" {
         CCLOG("payment system valid");
     }
     
-    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_rr(JNIEnv* env, jclass clazz, jint rewardId) {
+    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_rr(JNIEnv* env, jclass clazz, jboolean success, jint rewardId) {
         CCLOG("receive free coins");
         if (IvySDK::freeCoinCallback_ != 0)
-            IvySDK::freeCoinCallback_(rewardId);
+            IvySDK::freeCoinCallback_(success, rewardId);
     }
     
     JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_sns(JNIEnv* env, jclass clazz, jint msg, jboolean success, jint extra){
@@ -42,6 +43,15 @@ extern "C" {
             const char* ex = env->GetStringUTFChars(extra, 0);
             env->DeleteLocalRef(extra);
             IvySDK::leaderBoardCallback_(submit, success, id, ex);
+        }
+    }
+    
+    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_sr(JNIEnv* env, jclass clazz, jint resultCode, jboolean success, jstring ex) {
+        CCLOG("receive server result: %d", resultCode);
+        if (IvySDK::serverCallback_ != 0) {
+            const char* extra = env->GetStringUTFChars(ex, 0);
+            env->DeleteLocalRef(ex);
+            IvySDK::serverCallback_(resultCode, success, extra);
         }
     }
 #ifdef __cplusplus
