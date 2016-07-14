@@ -2,9 +2,9 @@
 ## 1, Copy files and init in Activity
 
 * copy Classes and proj.android to your Cocos2d-x project folder corresponding
--- before:
+* before:
 <center>![before copy](assets/risesdk-cocos-89d68.png)</center>
--- after:
+* after:
 <center>![after copy](assets/risesdk-cocos-1ed0e.png)</center>
 <center>![after copy](assets/risesdk-cocos-db52d.png)</center>
 
@@ -252,7 +252,7 @@ const char* friendString = IvySDK::friends();
 ## 7, Leaderboard
 When you want to use leaderboard, you should do this:
 * Define leaderboard call back
-```js
+```cpp
 void onReceiveLeaderboardResult(bool submit, bool success, const char* leaderBoardId, const char* data)
 {
     if (submit) {
@@ -272,9 +272,7 @@ void onReceiveLeaderboardResult(bool submit, bool success, const char* leaderBoa
 
 // call register in your initialize function
 bool HelloWorld::init() {
-  ...
   IvySDK::registerLeaderBoardCallback(onReceiveLeaderboardResult);
-  ...
 }
 ```
 
@@ -353,7 +351,7 @@ void onReceiveServerResult(int resultCode, bool success, const char* data) {
 ```
 
 the resultCode are defined in IvySDK, they are below:
-```csharp
+```cpp
 static const int SERVER_RESULT_RECEIVE_GAME_DATA = 1;
 static const int SERVER_RESULT_SAVE_USER_DATA = 2;
 static const int SERVER_RESULT_RECEIVE_USER_DATA = 3;
