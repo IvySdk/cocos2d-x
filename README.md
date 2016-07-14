@@ -1,5 +1,5 @@
 # RiseSDK for cocos2d-x
-###### 1, Copy files and init in Activity
+## 1, Copy files and init in Activity
 
 * copy Classes and proj.android to your Cocos2d-x project folder corresponding
 -- before:
@@ -52,10 +52,10 @@
 }
 ```
 
-###### 2, add IvySDK.cpp to your Android.mk file
+## 2, add IvySDK.cpp to your Android.mk file
 ![add src](assets/risesdk-cocos-f91ad.png)
 
-###### 3, ADs
+## 3, ADs
 call these functions when you want
 ```c++
 //show pass level full screen ad when you want
@@ -89,7 +89,7 @@ IvySDK::trackEvent("your category", "your action", "your label", 1);
 const char* data = IvySDK::getExtraData();
 ```
 
-###### 4, In-App Billing
+## 4, In-App Billing
 When you want to use IAP, you should do this:
 * register your payment callback
 ```c++
@@ -137,7 +137,7 @@ bool HelloWorld::init() {
 IvySDK::doBilling(BILLING_ID_ACTIVE_GAME);
 ```
 
-###### 5, Reward AD
+## 5, Reward AD
 when you want to use reward ad, you should do this:
 * register your reward ad callback
 ```c++
@@ -146,19 +146,21 @@ when you want to use reward ad, you should do this:
 ... etc.
 
 // define your callback function, this should be a global function or a member function of a class
-void onFreecoinResult(int rewardId) {
-	CCLOG("receive reward %i", rewardId);
-  // do your logic here
-  switch(rewardId) {
-    case REWARD_ID_CAR:
-    // do your logic
-    break;
+void onFreecoinResult(bool success, int rewardId) {
+  if (success) {
+    CCLOG("receive reward %i", rewardId);
+    // do your logic here
+    switch(rewardId) {
+      case REWARD_ID_CAR:
+      // do your logic
+      break;
 
-    case REWARD_ID_GOLD:
-    //do your logic
-    break;
+      case REWARD_ID_GOLD:
+      //do your logic
+      break;
 
-    ...
+      ...
+    }
   }
 }
 
@@ -171,15 +173,15 @@ bool HelloWorld::init() {
 ```
 * call showFreeCoin when you want
 ```c++
-// launch reward ad for gold
-IvySDK::showFreeCoin(REWARD_ID_GOLD);
-
 // determine whether the reward ad is available
 bool has = IvySDK::hasFreeCoin();
-if (has)...
+if (has) {
+  // launch reward ad for gold
+  IvySDK::showFreeCoin(REWARD_ID_GOLD);
+}
 ```
 
-###### 6, SNS
+## 6, SNS
 When you want to use SNS, you should do this:
 * define sns callback and register it
 ```js
@@ -247,7 +249,7 @@ const char* profileString = IvySDK::me();
 const char* friendString = IvySDK::friends();
 ```
 
-###### 7, Leaderboard
+## 7, Leaderboard
 When you want to use leaderboard, you should do this:
 * Define leaderboard call back
 ```js
@@ -288,7 +290,7 @@ IvySDK::loadFriendLeaderBoard("endless", 0, 20, "firend_id1,friend_id2");
 IvySDK::loadGlobalLeaderBoard("endless", 0, 20);
 ```
 
-###### 8, NativeAds
+## 8, NativeAds
 When you want to show some ads in your loading stage or pause game stage, you can use this type of ad. This Ad will show in screen position that measured by percentage of the screen height that you want. see blow:
 ```js
 // show native ad in screen with y position of 80 percent of screen height
@@ -305,6 +307,82 @@ if (IvySDK::hasNativeAd("loading")) {
 }
 ```
 
-###### 9, Congratulations, done.
+## 9, Server Data
+When you want to use these functions with our servers
+* store player data
+* sales promotion
+* notice, extra game data
+
+you can do these
+* init server result listener
+```cpp
+
+void onReceiveServerResult(int resultCode, bool success, const char* data) {
+    switch(resultCode) {
+        case IvySDK::SERVER_RESULT_SALES_CLICK:
+            if (success) {
+                int saleId = atoi(data);
+                CCLOG("sales clicked here: id %d", saleId);
+
+            }
+            break;
+
+        case IvySDK::SERVER_RESULT_VERIFY_CODE:
+            if (success) {
+                CCLOG("verify code success");
+            } else {
+                CCLOG("verify code fails");
+            }
+            break;
+
+        case IvySDK::SERVER_RESULT_RECEIVE_GAME_DATA:
+            if (success) {
+              // you can see the data format from:
+              //http://restartad.com/cloud/server/Mobile.sv.php?v=1&a=data&appid=13&version=1
+                CCLOG("game data is %s", data);
+            }
+            break;
+    }
+}
+  // call register in your initialize function
+  bool HelloWorld::init() {
+    ...
+    IvySDK::registerServerCallback(onReceiveServerResult);
+    ...
+  }
+```
+
+the resultCode are defined in IvySDK, they are below:
+```csharp
+static const int SERVER_RESULT_RECEIVE_GAME_DATA = 1;
+static const int SERVER_RESULT_SAVE_USER_DATA = 2;
+static const int SERVER_RESULT_RECEIVE_USER_DATA = 3;
+static const int SERVER_RESULT_VERIFY_CODE = 4;
+static const int SERVER_RESULT_SALES_CLICK = 5;
+```
+* now you can do what you want:
+```cpp
+// save user data
+const char* userData = ...
+IvySDK::saveUserData(userData);
+
+// load user data now, you will receive the result in function you have defined that named onReceiveServerResult
+IvySDK::loadUserData();
+
+// load game data, you will receive the result in function onReceiveServerResult
+int VERSION = 1;// the default value of VERSION is 1
+IvySDK::loadGameData(VERSION);
+
+// show sales promotion, if the player clicked the sales, you will receive SERVER_RESULT_SALES_CLICK in function onReceiveServerResult
+// the saleId is defined by the Operator, contact your group leader for more details
+int saleId = ...
+IvySDK::showSales(saleId);
+
+// verify the activity code, you will receive the result in function onReceiveServerResult, the code is provided by the player
+const char* code = ...
+IvySDK::verifyCode(code);
+```
+
+## 10, Congratulations, done.
  You will see some toasts when you run your game in your android phone or emulator:
 <center>![toast](assets/risesdk-cocos-a0e84.png)</center>

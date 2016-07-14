@@ -141,6 +141,7 @@ bool HelloWorld::init() {
 	IvySDK::registerFreecoinCallback(onFreecoinResult);
     IvySDK::registerSNSCallback(onReceiveSNSResult);
     IvySDK::registerLeaderBoardCallback(onReceiveLeaderboardResult);
+    IvySDK::registerServerCallback(onReceiveServerResult);
 
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	auto origin = Director::getInstance()->getVisibleOrigin();
