@@ -44,6 +44,17 @@ namespace IvySDK
     static const int SERVER_RESULT_VERIFY_CODE = 4;
     static const int SERVER_RESULT_SALES_CLICK = 5;
     
+    static const int CONFIG_KEY_APP_ID = 1;
+    static const int CONFIG_KEY_LEADER_BOARD_URL = 2;
+    static const int CONFIG_KEY_API_VERSION = 3;
+    static const int CONFIG_KEY_SCREEN_WIDTH = 4;
+    static const int CONFIG_KEY_SCREEN_HEIGHT = 5;
+    static const int CONFIG_KEY_LANGUAGE = 6;
+    static const int CONFIG_KEY_COUNTRY = 7;
+    static const int CONFIG_KEY_VERSION_CODE = 8;
+    static const int CONFIG_KEY_VERSION_NAME = 9;
+    static const int CONFIG_KEY_PACKAGE_NAME = 10;
+    
     #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
     static const char* sdkClassName_ = "com/risesdk/client/Cocos";
     extern onPaymentResult paymentCallback_;
@@ -91,6 +102,44 @@ namespace IvySDK
             return "{}";
         }
         jstring result = (jstring)methodInfo.env->CallStaticObjectMethod(methodInfo.classID, methodInfo.methodID);
+        const char* cs = methodInfo.env->GetStringUTFChars(result, 0);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(result);
+        return cs;
+#else
+        return def;
+#endif
+    }
+    
+    static const char* callUTFUTFMethod(const char* method, const char* def, const char* p) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, method, "(Ljava/lang/String;)Ljava/lang/String;"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return "{}";
+        }
+        jstring pp = methodInfo.env->NewStringUTF(p);
+        jstring result = (jstring)methodInfo.env->CallStaticObjectMethod(methodInfo.classID, methodInfo.methodID, pp);
+        const char* cs = methodInfo.env->GetStringUTFChars(result, 0);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(result);
+        methodInfo.env->DeleteLocalRef(pp);
+        return cs;
+#else
+        return def;
+#endif
+    }
+    
+    static const char* callIntUTFMethod(const char* method, const char* def, int key) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, method, "(I)Ljava/lang/String;"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return "{}";
+        }
+        jstring result = (jstring)methodInfo.env->CallStaticObjectMethod(methodInfo.classID, methodInfo.methodID, key);
         const char* cs = methodInfo.env->GetStringUTFChars(result, 0);
         methodInfo.env->DeleteLocalRef(methodInfo.classID);
         methodInfo.env->DeleteLocalRef(result);
@@ -410,18 +459,26 @@ namespace IvySDK
 #endif
     }
     
-    static void registerLeaderBoardCallback(onLeaderBoardResult callback)
-    {
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-        leaderBoardCallback_ = callback;
-#endif
-    }
+//    static void registerLeaderBoardCallback(onLeaderBoardResult callback)
+//    {
+//#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+//        leaderBoardCallback_ = callback;
+//#endif
+//    }
     
     static void registerServerCallback(onServerResult callback)
     {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
         serverCallback_ = callback;
 #endif
+    }
+    
+    static const char* getConfig(int configKey) {
+        return callIntUTFMethod("getConfig", "", configKey);
+    }
+    
+    static const char* cacheUrl(const char* url) {
+        return callUTFUTFMethod("cacheUrl", "", url);
     }
 }
 

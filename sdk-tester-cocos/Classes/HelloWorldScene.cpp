@@ -67,23 +67,23 @@ void onReceiveSNSResult(int resultType, bool success, int extra) {
             break;
     }
 }
-
-void onReceiveLeaderboardResult(bool submit, bool success, const char* leaderBoardId, const char* data)
-{
-    if (submit) {
-        if (success) {
-            CCLOG("submit score to %s success", leaderBoardId);
-        } else {
-            CCLOG("submit score to %s fails", leaderBoardId);
-        }
-    } else {
-        if (success) {
-            CCLOG("load leader board %s success; data is %s", leaderBoardId, data);
-        } else {
-            CCLOG("load leader board %s fails", leaderBoardId);
-        }
-    }
-}
+//
+//void onReceiveLeaderboardResult(bool submit, bool success, const char* leaderBoardId, const char* data)
+//{
+//    if (submit) {
+//        if (success) {
+//            CCLOG("submit score to %s success", leaderBoardId);
+//        } else {
+//            CCLOG("submit score to %s fails", leaderBoardId);
+//        }
+//    } else {
+//        if (success) {
+//            CCLOG("load leader board %s success; data is %s", leaderBoardId, data);
+//        } else {
+//            CCLOG("load leader board %s fails", leaderBoardId);
+//        }
+//    }
+//}
 
 void onReceiveServerResult(int resultCode, bool success, const char* data) {
     switch(resultCode) {
@@ -140,7 +140,7 @@ bool HelloWorld::init() {
 	IvySDK::registerPaymentCallback(onPaymentResult);
 	IvySDK::registerFreecoinCallback(onFreecoinResult);
     IvySDK::registerSNSCallback(onReceiveSNSResult);
-    IvySDK::registerLeaderBoardCallback(onReceiveLeaderboardResult);
+//    IvySDK::registerLeaderBoardCallback(onReceiveLeaderboardResult);
     IvySDK::registerServerCallback(onReceiveServerResult);
 
 	auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -163,7 +163,7 @@ bool HelloWorld::init() {
 	float px = origin.x + 40;
 
 	ccMenuCallback handler = CC_CALLBACK_1(HelloWorld::AdButtonClicked, this);
-    const int label_size = 28;
+    const int label_size = 30;
     const char* labels[label_size] = {
         "Pause AD", // 1
         "PassLevel",// 2
@@ -192,7 +192,9 @@ bool HelloWorld::init() {
         "Show Native", //25,
         "Hide Native", //26,
         "show sales", //27
-        "load game data" //28
+        "load game data", //28
+        "get app id", //29
+        "cache url", //30
     };
     
     int xOffset = 0;
@@ -294,17 +296,17 @@ void HelloWorld::AdButtonClicked(Ref* ref) {
             IvySDK::invite();
             break;
             
-        case 22:
-            IvySDK::submitScore("endless", 320, "");
-            break;
-            
-        case 23:
-            IvySDK::loadFriendLeaderBoard("endless", 0, 20, "");
-            break;
-            
-        case 24:
-            IvySDK::loadGlobalLeaderBoard("endless", 0, 20);
-            break;
+//        case 22:
+//            IvySDK::submitScore("endless", 320, "");
+//            break;
+//            
+//        case 23:
+//            IvySDK::loadFriendLeaderBoard("endless", 0, 20, "");
+//            break;
+//            
+//        case 24:
+//            IvySDK::loadGlobalLeaderBoard("endless", 0, 20);
+//            break;
             
         case 25:
             IvySDK::showNativeAd("lock_pre", 80);
@@ -314,12 +316,20 @@ void HelloWorld::AdButtonClicked(Ref* ref) {
             IvySDK::hideNativeAd("lock_pre");
             break;
             
-        case 27:
-            IvySDK::showSales(2);
+//        case 27:
+//            IvySDK::showSales(2);
+//            break;
+//            
+//        case 28:
+//            IvySDK::loadGameData(1);
+//            break;
+            
+        case 29:
+            CCLOG("app id is %s", IvySDK::getConfig(IvySDK::CONFIG_KEY_APP_ID));
             break;
             
-        case 28:
-            IvySDK::loadGameData(1);
+        case 30:
+            CCLOG("cached result path is %s", IvySDK::cacheUrl("http://img4.imgtn.bdimg.com/it/u=3087502007,2322343371&fm=21&gp=0.jpg"));
             break;
             
 	default:
