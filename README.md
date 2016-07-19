@@ -56,6 +56,14 @@
 ![add src](assets/risesdk-cocos-f91ad.png)
 
 ## 3, ADs
+This module will make these things done:
+* show banner
+* close banner
+* show full screen ad
+* make the player to share the game to his friends
+* let the player to give your game a 5-star-rating
+* track the player's behaviors for analytics
+
 call these functions when you want
 ```c++
 //show pass level full screen ad when you want
@@ -87,6 +95,25 @@ IvySDK::trackEvent("your category", "your action", "your label", 1);
 
 // get your custom data from server, return "{}" default
 const char* data = IvySDK::getExtraData();
+```
+* Notice
+AD_POS* are defined in namespace IvySDK
+you should NOT define these again
+```cpp
+// these for banner ads
+static const int AD_POS_LEFT_TOP = 1;
+static const int AD_POS_MIDDLE_TOP = 3;
+static const int AD_POS_RIGHT_TOP = 6;
+static const int AD_POS_MIDDLE_MIDDLE = 5;
+static const int AD_POS_LEFT_BOTTOM = 2;
+static const int AD_POS_MIDDLE_BOTTOM = 4;
+static const int AD_POS_RIGHT_BOTTOM = 7;
+
+// these for interstitial ads
+static const char* AD_POS_GAME_START = "start";
+static const char* AD_POS_GAME_PAUSE = "pause";
+static const char* AD_POS_GAME_PASSLEVEL = "passlevel";
+static const char* AD_POS_GAME_CUSTOM = "custom";
 ```
 
 ## 4, In-App Billing
@@ -132,12 +159,23 @@ bool HelloWorld::init() {
   ...
 }
 ```
+* Notice
+PAYMENT_RESULT* are defined in namespace IvySDK:
+you should NOT define these again
+```cpp
+static const int PAYMENT_RESULT_SUCCESS = 0;
+static const int PAYMENT_RESULT_CANCEL = 1;
+static const int PAYMENT_RESULT_FAILURE = 2;
+```
+
 * call doBilling when you want
 ```c++
 IvySDK::doBilling(BILLING_ID_ACTIVE_GAME);
 ```
 
 ## 5, Reward AD
+Reward Ad is a video ad that when the player saw it, you will give him some golds/items/diamonds etc.
+
 when you want to use reward ad, you should do this:
 * register your reward ad callback
 ```c++
@@ -182,9 +220,18 @@ if (has) {
 ```
 
 ## 6, SNS
-When you want to use SNS, you should do this:
+This module can make these things done:
+* login with facebook
+* logout
+* like your facebook page
+* let the player invite his friends
+* let the player challenge his friends
+* get friends list
+* get player's profile
+
+If you want to use SNS, you can do this:
 * define sns callback and register it
-```js
+```cpp
 void onReceiveSNSResult(int resultType, bool success, int extra) {
     switch(resultType) {
         case IvySDK::SNS_RESULT_LOGIN:
@@ -222,6 +269,16 @@ bool HelloWorld::init() {
   ...
 }
 ```
+* Notice:
+SNS_RESULT* are defined in namespace IvySDK:
+you should NOT define these again
+```cpp
+static const int SNS_RESULT_LOGIN = 1;
+static const int SNS_RESULT_INVITE = 2;
+static const int SNS_RESULT_CHALLENGE = 3;
+static const int SNS_RESULT_LIKE = 4;
+```
+
 * and then you can do this when needed:
 ```js
 // login
@@ -249,48 +306,9 @@ const char* profileString = IvySDK::me();
 const char* friendString = IvySDK::friends();
 ```
 
-## 7, Leaderboard
-When you want to use leaderboard, you should do this:
-* Define leaderboard call back
-```cpp
-void onReceiveLeaderboardResult(bool submit, bool success, const char* leaderBoardId, const char* data)
-{
-    if (submit) {
-        if (success) {
-            CCLOG("submit score to %s success", leaderBoardId);
-        } else {
-            CCLOG("submit score to %s fails", leaderBoardId);
-        }
-    } else {
-        if (success) {
-            CCLOG("load leader board %s success; data is %s", leaderBoardId, data);
-        } else {
-            CCLOG("load leader board %s fails", leaderBoardId);
-        }
-    }
-}
-
-// call register in your initialize function
-bool HelloWorld::init() {
-  IvySDK::registerLeaderBoardCallback(onReceiveLeaderboardResult);
-}
-```
-
-* and you can use leaderboard now, do this:
-```js
-// submit user score to leaderboard named "endless"
-IvySDK::submitScore("endless", 320, "");
-
-// load first 20 leaderboard data with friends
-IvySDK::loadFriendLeaderBoard("endless", 0, 20, "firend_id1,friend_id2");
-
-// load first 20 leaderboard data among all players
-IvySDK::loadGlobalLeaderBoard("endless", 0, 20);
-```
-
-## 8, NativeAds
+## 7, NativeAds
 When you want to show some ads in your loading stage or pause game stage, you can use this type of ad. This Ad will show in screen position that measured by percentage of the screen height that you want. see blow:
-```js
+```cpp
 // show native ad in screen with y position of 80 percent of screen height
 IvySDK::showNativeAd("loading", 80);
 
@@ -305,82 +323,33 @@ if (IvySDK::hasNativeAd("loading")) {
 }
 ```
 
-## 9, Server Data
-When you want to use these functions with our servers
-* store player data
-* sales promotion
-* notice, extra game data
+## 8, Misc
+* download something and cache it (async)
+* get system configurations
 
-you can do these
-* init server result listener
 ```cpp
+// download a bitmap and cache it
+const char* path = IvySDK::cacheUrl("http://img.google.com/xxxxxx.png");
+// do your works, you can query the path whether exists or not after 5 seconds
 
-void onReceiveServerResult(int resultCode, bool success, const char* data) {
-    switch(resultCode) {
-        case IvySDK::SERVER_RESULT_SALES_CLICK:
-            if (success) {
-                int saleId = atoi(data);
-                CCLOG("sales clicked here: id %d", saleId);
+// get system configurations
+const char* config = IvySDK::getConfig(IvySDK::CONFIG_KEY_APP_ID);
+int appId = itoa(config);
 
-            }
-            break;
-
-        case IvySDK::SERVER_RESULT_VERIFY_CODE:
-            if (success) {
-                CCLOG("verify code success");
-            } else {
-                CCLOG("verify code fails");
-            }
-            break;
-
-        case IvySDK::SERVER_RESULT_RECEIVE_GAME_DATA:
-            if (success) {
-              // you can see the data format from:
-              //http://restartad.com/cloud/server/Mobile.sv.php?v=1&a=data&appid=13&version=1
-                CCLOG("game data is %s", data);
-            }
-            break;
-    }
-}
-  // call register in your initialize function
-  bool HelloWorld::init() {
-    ...
-    IvySDK::registerServerCallback(onReceiveServerResult);
-    ...
-  }
+// the configurations are defined in namespace IvySDK
+// you should NOT define these again
+static const int CONFIG_KEY_APP_ID = 1;
+static const int CONFIG_KEY_LEADER_BOARD_URL = 2;
+static const int CONFIG_KEY_API_VERSION = 3;
+static const int CONFIG_KEY_SCREEN_WIDTH = 4;
+static const int CONFIG_KEY_SCREEN_HEIGHT = 5;
+static const int CONFIG_KEY_LANGUAGE = 6;
+static const int CONFIG_KEY_COUNTRY = 7;
+static const int CONFIG_KEY_VERSION_CODE = 8;
+static const int CONFIG_KEY_VERSION_NAME = 9;
+static const int CONFIG_KEY_PACKAGE_NAME = 10;
 ```
 
-the resultCode are defined in IvySDK, they are below:
-```cpp
-static const int SERVER_RESULT_RECEIVE_GAME_DATA = 1;
-static const int SERVER_RESULT_SAVE_USER_DATA = 2;
-static const int SERVER_RESULT_RECEIVE_USER_DATA = 3;
-static const int SERVER_RESULT_VERIFY_CODE = 4;
-static const int SERVER_RESULT_SALES_CLICK = 5;
-```
-* now you can do what you want:
-```cpp
-// save user data
-const char* userData = ...
-IvySDK::saveUserData(userData);
-
-// load user data now, you will receive the result in function you have defined that named onReceiveServerResult
-IvySDK::loadUserData();
-
-// load game data, you will receive the result in function onReceiveServerResult
-int VERSION = 1;// the default value of VERSION is 1
-IvySDK::loadGameData(VERSION);
-
-// show sales promotion, if the player clicked the sales, you will receive SERVER_RESULT_SALES_CLICK in function onReceiveServerResult
-// the saleId is defined by the Operator, contact your group leader for more details
-int saleId = ...
-IvySDK::showSales(saleId);
-
-// verify the activity code, you will receive the result in function onReceiveServerResult, the code is provided by the player
-const char* code = ...
-IvySDK::verifyCode(code);
-```
-
-## 10, Congratulations, done.
+## 9, Congratulations, done.
  You will see some toasts when you run your game in your android phone or emulator:
 <center>![toast](assets/risesdk-cocos-a0e84.png)</center>
