@@ -326,6 +326,9 @@ if (IvySDK::hasNativeAd("loading")) {
 ## 8, Misc
 * download something and cache it (async)
 * get system configurations
+* query whether installed an app or not
+* launch an app
+* goto play store for an app
 
 ```cpp
 // download a bitmap and cache it
@@ -348,6 +351,16 @@ static const int CONFIG_KEY_COUNTRY = 7;
 static const int CONFIG_KEY_VERSION_CODE = 8;
 static const int CONFIG_KEY_VERSION_NAME = 9;
 static const int CONFIG_KEY_PACKAGE_NAME = 10;
+
+// query an app whether installed or not
+const char* appPackageName = "com.yes.good";
+if (IvySDK::hasApp(appPackageName)) {
+  // launch this app
+  IvySDK::launchApp(appPackageName);
+} else {
+  // goto play store for this app
+  IvySDK::getApp(appPackageName);
+}
 ```
 
 ## 9, Congratulations, done.
