@@ -77,6 +77,21 @@ namespace IvySDK
 #endif
     }
     
+    static bool callVoidUTFMethod(const char* method, const char* p) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, method, "(Ljava/lang/String;)V"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return false;
+        }
+        jstring tag = methodInfo.env->NewStringUTF(p);
+        methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, tag);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(tag);
+#endif
+    }
+    
     static bool callBooleanMethod(const char* method) {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
         JniMethodInfo methodInfo;
@@ -87,6 +102,24 @@ namespace IvySDK
         }
         bool result = methodInfo.env->CallStaticBooleanMethod(methodInfo.classID, methodInfo.methodID);
         methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        return result;
+#else
+        return false;
+#endif
+    }
+    
+    static bool callBooleanUTFMethod(const char* method, const char* p) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, method, "(Ljava/lang/String;)Z"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return false;
+        }
+        jstring tag = methodInfo.env->NewStringUTF(p);
+        bool result = methodInfo.env->CallStaticBooleanMethod(methodInfo.classID, methodInfo.methodID, tag);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(tag);
         return result;
 #else
         return false;
@@ -479,6 +512,18 @@ namespace IvySDK
     
     static const char* cacheUrl(const char* url) {
         return callUTFUTFMethod("cacheUrl", "", url);
+    }
+    
+    static bool hasApp(const char* packageName) {
+        return callBooleanUTFMethod("hasApp", packageName);
+    }
+    
+    static void getApp(const char* packageName) {
+        callVoidUTFMethod("getApp", packageName);
+    }
+    
+    static void launchApp(const char* packageName) {
+        callVoidUTFMethod("launchApp", packageName);
     }
 }
 
