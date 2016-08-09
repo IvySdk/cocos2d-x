@@ -7,6 +7,7 @@ namespace IvySDK {
     onSNSResult snsCallback_;
     onLeaderBoardResult leaderBoardCallback_;
     onServerResult serverCallback_;
+    onCacheUrlResult cacheCallback_;
 }
 #ifdef __cplusplus
 extern "C" {
@@ -52,6 +53,16 @@ extern "C" {
             const char* extra = env->GetStringUTFChars(ex, 0);
             env->DeleteLocalRef(ex);
             IvySDK::serverCallback_(resultCode, success, extra);
+        }
+    }
+    
+    
+    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_url(JNIEnv* env, jclass clazz, jint tag, jboolean success, jstring ex) {
+        CCLOG("receive url result: %d", tag);
+        if (IvySDK::cacheCallback_ != 0) {
+            const char* extra = env->GetStringUTFChars(ex, 0);
+            env->DeleteLocalRef(ex);
+            IvySDK::cacheCallback_(tag, success, extra);
         }
     }
 #ifdef __cplusplus

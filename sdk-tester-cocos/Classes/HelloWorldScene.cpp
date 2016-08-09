@@ -112,6 +112,14 @@ void onReceiveServerResult(int resultCode, bool success, const char* data) {
     }
 }
 
+void onCacheUrlResult(int tag, bool success, const char* path) {
+    switch(tag){
+        case 1:
+            CCLOG("tag 1 success? %d, path %s", success ? 1 : 0, path);
+            break;
+    }
+}
+
 /////////////////////////////////////////////////////////
 
 Scene* HelloWorld::scene() {
@@ -140,6 +148,7 @@ bool HelloWorld::init() {
 	IvySDK::registerPaymentCallback(onPaymentResult);
 	IvySDK::registerFreecoinCallback(onFreecoinResult);
     IvySDK::registerSNSCallback(onReceiveSNSResult);
+    IvySDK::registerCacheUrlCallback(onCacheUrlResult);
 //    IvySDK::registerLeaderBoardCallback(onReceiveLeaderboardResult);
     IvySDK::registerServerCallback(onReceiveServerResult);
 
@@ -163,7 +172,7 @@ bool HelloWorld::init() {
 	float px = origin.x + 40;
 
 	ccMenuCallback handler = CC_CALLBACK_1(HelloWorld::AdButtonClicked, this);
-    const int label_size = 30;
+    const int label_size = 31;
     const char* labels[label_size] = {
         "Pause AD", // 1
         "PassLevel",// 2
@@ -195,6 +204,7 @@ bool HelloWorld::init() {
         "load game data", //28
         "get app id", //29
         "cache url", //30
+        "cache url tag", //31
     };
     
     int xOffset = 0;
@@ -208,9 +218,9 @@ bool HelloWorld::init() {
         menu1->setPosition(CCPointZero);
         addChild(menu1, 3);
         
-        yOffset += 40;
+        yOffset += 20;
         if (yOffset > 200) {
-            xOffset += 100;
+            xOffset += 80;
             yOffset = 0;
         }
     }
@@ -330,6 +340,10 @@ void HelloWorld::AdButtonClicked(Ref* ref) {
             
         case 30:
             CCLOG("cached result path is %s", IvySDK::cacheUrl("http://img4.imgtn.bdimg.com/it/u=3087502007,2322343371&fm=21&gp=0.jpg"));
+            break;
+            
+        case 31:
+            IvySDK::cacheUrl(1, "http://img4.imgtn.bdimg.com/it/u=3087502007,2322343371&fm=21&gp=0.jpg");
             break;
             
 	default:

@@ -15,6 +15,7 @@ namespace IvySDK
     typedef void (*onSNSResult)(int msg, bool success, int extra);
     typedef void (*onLeaderBoardResult)(bool isSubmit, bool success, const char* leaderBoardId, const char* data);
     typedef void (*onServerResult)(int resultCode, bool success, const char* data);
+    typedef void (*onCacheUrlResult)(int tag, bool success, const char* data);
     
     static const int AD_POS_LEFT_TOP = 1;
     static const int AD_POS_MIDDLE_TOP = 3;
@@ -62,6 +63,7 @@ namespace IvySDK
     extern onSNSResult snsCallback_;
     extern onLeaderBoardResult leaderBoardCallback_;
     extern onServerResult serverCallback_;
+    extern onCacheUrlResult cacheCallback_;
     #endif
     
     static void callVoidMethod(const char* method) {
@@ -492,6 +494,13 @@ namespace IvySDK
 #endif
     }
     
+    static void registerCacheUrlCallback(onCacheUrlResult callback)
+    {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        cacheCallback_ = callback;
+#endif
+    }
+    
 //    static void registerLeaderBoardCallback(onLeaderBoardResult callback)
 //    {
 //#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
@@ -512,6 +521,20 @@ namespace IvySDK
     
     static const char* cacheUrl(const char* url) {
         return callUTFUTFMethod("cacheUrl", "", url);
+    }
+    
+    static void cacheUrl(int tag, const char* url) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "cacheUrl", "(ILjava/lang/String;)V"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+        }
+        jstring url_ = methodInfo.env->NewStringUTF(url);
+        methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, tag, url_);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(url_);
+#endif
     }
     
     static bool hasApp(const char* packageName) {
@@ -538,6 +561,7 @@ extern "C"
     JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_sns(JNIEnv* env, jclass clazz, jint msg, jboolean success, jint result);
     JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_lb(JNIEnv* env, jclass clazz, jboolean submit, jboolean success, jstring leaderBoardId, jstring ex);
     JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_sr(JNIEnv* env, jclass clazz, jint resultCode, jboolean success, jstring ex);
+    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_url(JNIEnv* env, jclass clazz, jint tag, jboolean success, jstring ex);
 #ifdef __cplusplus
 }
 #endif

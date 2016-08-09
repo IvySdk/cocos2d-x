@@ -50,6 +50,22 @@
 -keep class android.support.** {
     *;
 }
+
+-keep class com.risecore.async.** {
+    public *;
+}
+
+-keep class com.risecore.common.** {
+    public *;
+}
+
+-keep class com.risecore.network.** {
+    public *;
+}
+
+-keep class com.risecore.view.** {
+    public *;
+}
 ```
 
 ## 2, add IvySDK.cpp to your Android.mk file
@@ -330,11 +346,41 @@ if (IvySDK::hasNativeAd("loading")) {
 * launch an app
 * goto play store for an app
 
+Download a bitmap and cache it (without callback)
 ```cpp
-// download a bitmap and cache it
 const char* path = IvySDK::cacheUrl("http://img.google.com/xxxxxx.png");
 // do your works, you can query the path whether exists or not after 5 seconds
+```
 
+If you want to cache an url and let the system give you a callback, you can do this
+* define callback
+```cpp
+const int TAG_BITMAP = 1;
+
+void onCacheUrlResult(int tag, bool success, const char* path) {
+  switch(tag) {
+    case TAG_BITMAP:
+    CCLOG("download bitmap result success ? %d, path is %s", success ? 1 : 0, path);
+    break;
+  }
+}
+
+// call register in your initialize function
+bool HelloWorld::init() {
+  ...
+  IvySDK::registerCacheUrlCallback(onCacheUrlResult);
+  ...
+}
+```
+
+* download
+```cpp
+// download a bitmap and cache it with callback
+IvySDK::cacheUrl(TAG_BITMAP, "http://img.google.com/xxxxxx.png");
+```
+
+* other misc
+```cpp
 // get system configurations
 const char* config = IvySDK::getConfig(IvySDK::CONFIG_KEY_APP_ID);
 int appId = itoa(config);
