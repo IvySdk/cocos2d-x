@@ -240,9 +240,9 @@ This module can make these things done:
 * login with facebook
 * logout
 * like your facebook page
-* let the player invite his friends
-* let the player challenge his friends
-* get friends list
+* let the player invite his all friends
+* let the player challenge his all friends
+* get the player's friend list that have played this game
 * get player's profile
 
 If you want to use SNS, you can do this:
