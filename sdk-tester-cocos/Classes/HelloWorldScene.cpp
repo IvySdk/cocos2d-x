@@ -244,7 +244,7 @@ void HelloWorld::AdButtonClicked(Ref* ref) {
 		IvySDK::onQuit();
 		break;
 	case 5:// Show Banner
-		IvySDK::showBanner(IvySDK::AD_POS_MIDDLE_TOP);
+		IvySDK::showBanner("default", IvySDK::AD_POS_MIDDLE_TOP);
 		break;
 	case 6:// Close Banner
 		IvySDK::closeBanner();
@@ -256,7 +256,7 @@ void HelloWorld::AdButtonClicked(Ref* ref) {
 		IvySDK::showMoreGame();
 		break;
 	case 9:// Show Free Coin
-		IvySDK::showFreeCoin(1);
+		IvySDK::showFreeCoin("default", 1);
 		break;
 	case 10:// Do billing
 		IvySDK::doBilling(BILLING_ID_ACTIVE_GAME);

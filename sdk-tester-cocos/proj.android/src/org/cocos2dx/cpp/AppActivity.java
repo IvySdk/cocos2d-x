@@ -28,7 +28,7 @@ package org.cocos2dx.cpp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import com.risesdk.client.Cocos;
+import com.android.client.Cocos;
 import org.cocos2dx.lib.Cocos2dxActivity;
 
 public class AppActivity extends Cocos2dxActivity {

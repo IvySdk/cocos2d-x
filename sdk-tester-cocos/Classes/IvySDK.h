@@ -57,7 +57,7 @@ namespace IvySDK
     static const int CONFIG_KEY_PACKAGE_NAME = 10;
     
     #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-    static const char* sdkClassName_ = "com/risesdk/client/Cocos";
+    static const char* sdkClassName_ = "com/android/client/Cocos";
     extern onPaymentResult paymentCallback_;
     extern onFreecoinResult freeCoinCallback_;
     extern onSNSResult snsCallback_;
@@ -213,6 +213,23 @@ namespace IvySDK
     	#endif
     }
     
+    static void showBanner(const char* tag, int pos)
+    {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "showBanner", "(Ljava/lang/String;I)V"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return;
+        }
+        jstring t = methodInfo.env->NewStringUTF(tag);
+        methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, t, pos);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(t);
+#endif
+    }
+
+    
     static void showBanner(int pos)
     {
         #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
@@ -298,6 +315,41 @@ namespace IvySDK
     static bool hasFreeCoin()
     {
         return callBooleanMethod("hasRewardAd");
+    }
+    
+    static void showFreeCoin(const char* tag, int rewardId)
+    {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "showRewardAd", "(Ljava/lang/String;I)V"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return;
+        }
+        jstring t = methodInfo.env->NewStringUTF(tag);
+        methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, t, rewardId);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(t);
+#endif
+    }
+    
+    static bool hasFreeCoin(const char* tag)
+    {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "hasRewardAd", "(Ljava/lang/String;)V"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return false;
+        }
+        jstring t = methodInfo.env->NewStringUTF(tag);
+        bool result = methodInfo.env->CallStaticBooleanMethod(methodInfo.classID, methodInfo.methodID, t);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(t);
+        return result;
+#else
+        return false;
+#endif
     }
     
     static void trackEvent(const char* category, const char* action, const char* label, int value) {
@@ -555,13 +607,13 @@ namespace IvySDK
 extern "C" 
 {
 #endif
-    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_pr(JNIEnv* env, jclass clazz, jint billingId, jint status);
-    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_pv(JNIEnv* env, jclass clazz);
-    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_rr(JNIEnv* env, jclass clazz, jboolean success, jint rewardId);
-    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_sns(JNIEnv* env, jclass clazz, jint msg, jboolean success, jint result);
-    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_lb(JNIEnv* env, jclass clazz, jboolean submit, jboolean success, jstring leaderBoardId, jstring ex);
-    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_sr(JNIEnv* env, jclass clazz, jint resultCode, jboolean success, jstring ex);
-    JNIEXPORT void JNICALL Java_com_risesdk_client_Cocos_url(JNIEnv* env, jclass clazz, jint tag, jboolean success, jstring ex);
+    JNIEXPORT void JNICALL Java_com_android_client_Cocos_pr(JNIEnv* env, jclass clazz, jint billingId, jint status);
+    JNIEXPORT void JNICALL Java_com_android_client_Cocos_pv(JNIEnv* env, jclass clazz);
+    JNIEXPORT void JNICALL Java_com_android_client_Cocos_rr(JNIEnv* env, jclass clazz, jboolean success, jint rewardId);
+    JNIEXPORT void JNICALL Java_com_android_client_Cocos_sns(JNIEnv* env, jclass clazz, jint msg, jboolean success, jint result);
+    JNIEXPORT void JNICALL Java_com_android_client_Cocos_lb(JNIEnv* env, jclass clazz, jboolean submit, jboolean success, jstring leaderBoardId, jstring ex);
+    JNIEXPORT void JNICALL Java_com_android_client_Cocos_sr(JNIEnv* env, jclass clazz, jint resultCode, jboolean success, jstring ex);
+    JNIEXPORT void JNICALL Java_com_android_client_Cocos_url(JNIEnv* env, jclass clazz, jint tag, jboolean success, jstring ex);
 #ifdef __cplusplus
 }
 #endif
