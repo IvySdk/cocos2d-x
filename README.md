@@ -43,7 +43,8 @@
 
 * if you use proguard to obfuscate your java source code, you should add these rules to your proguard rules file:
 ```java
--keep class com.risesdk.client.** {
+-dontwarn com.unity3d.**
+-keep class com.android.client.** {
     <methods>;
 }
 
@@ -51,21 +52,22 @@
     *;
 }
 
--keep class com.risecore.async.** {
+-keep class com.core.async.** {
     public *;
 }
 
--keep class com.risecore.common.** {
+-keep class com.core.common.** {
     public *;
 }
 
--keep class com.risecore.network.** {
+-keep class com.core.network.** {
     public *;
 }
 
--keep class com.risecore.view.** {
+-keep class com.core.view.** {
     public *;
 }
+
 ```
 
 ## 2, add IvySDK.cpp to your Android.mk file
