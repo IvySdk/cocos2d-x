@@ -1,4 +1,6 @@
 # RiseSDK for cocos2d-x
+## Version: 3.2
+
 ## 1, Copy files and init in Activity
 
 * copy Classes and proj.android to your Cocos2d-x project folder corresponding
