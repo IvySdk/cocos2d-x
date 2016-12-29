@@ -301,7 +301,7 @@ bool HelloWorld::init() {
 }
 ```
 
-* download
+* 下载
 ```cpp
 // download a bitmap and cache it with callback
 IvySDK::cacheUrl(TAG_BITMAP, "http://img.google.com/xxxxxx.png");
