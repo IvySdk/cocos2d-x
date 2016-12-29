@@ -75,182 +75,34 @@
 ## 2, add IvySDK.cpp to your Android.mk file
 ![add src](assets/risesdk-cocos-f91ad.png)
 
-## 3, ADs
-This module will make these things done:
-* show banner
-* close banner
-* show full screen ad
-* make the player to share the game to his friends
-* let the player to give your game a 5-star-rating
-* track the player's behaviors for analytics
+##3，页面广告API
 
-call these functions when you want
-```c++
-//show pass level full screen ad when you want
-IvySDK::showInterstitial(IvySDK::AD_POS_GAME_PASSLEVEL);
-
-// show pause ad when you want
-IvySDK::showInterstitial(IvySDK::AD_POS_GAME_PAUSE);
-
-// show banner at the top center position of your phone
-IvySDK::showBanner(IvySDK::AD_POS_MIDDLE_TOP);
-
-// close banner when needed
-IvySDK::closeBanner();
-
-// when you want to quit the game
-IvySDK::onQuit();
-
-// ask the player to share your game with his friends
-IvySDK::share();
-
-// ask the player to give you a 5-star-rating
-IvySDK::rateUs();
-
-// show more game to the player
-IvySDK::showMoreGame();
-
-// when you want to track the player behavior
-IvySDK::trackEvent("your category", "your action", "your label", 1);
-
-// get your custom data from server, return "{}" default
-const char* data = IvySDK::getExtraData();
-```
-* Notice
-AD_POS* are defined in namespace IvySDK
-you should NOT define these again
+*全屏广告，需配置不同时机弹出的广告，以便于后台统计,我们预定义了以下几种时机弹出的广告：
 ```cpp
-// these for banner ads
-static const int AD_POS_LEFT_TOP = 1;
-static const int AD_POS_MIDDLE_TOP = 3;
-static const int AD_POS_RIGHT_TOP = 6;
-static const int AD_POS_MIDDLE_MIDDLE = 5;
-static const int AD_POS_LEFT_BOTTOM = 2;
-static const int AD_POS_MIDDLE_BOTTOM = 4;
-static const int AD_POS_RIGHT_BOTTOM = 7;
-
-// these for interstitial ads
-static const char* AD_POS_GAME_START = "start";
-static const char* AD_POS_GAME_PAUSE = "pause";
-static const char* AD_POS_GAME_PASSLEVEL = "passlevel";
-static const char* AD_POS_GAME_CUSTOM = "custom";
+IvySDK::showFullAd(IvySDK::AD_POS_GAME_START); //游戏开始时
+IvySDK::showFullAd(IvySDK::AD_POS_GAME_PAUSE); //游戏暂停
+IvySDK::showFullAd(IvySDK::AD_POS_GAME_PASSLEVEL);//游戏过关
+IvySDK::onQuit();//游戏退出并调用广告
+IvySDK::showFullAd(IvySDK::AD_POS_GAME_CUSTOM); //您还使用自定义类型广告
 ```
+注意：以上类型广告的弹出不要在activity的生命周期onResume()和onPause()中调用
 
-## 4, In-App Billing
-When you want to use IAP, you should do this:
-* register your payment callback
-```c++
-// define your bill ids
-#define BILLING_ID_ACTIVE_GAME 1
-#define BILLING_ID_BUY_CAR 2
-... etc.
-
-static void onPaymentSuccess(int billId) {
-	switch (billId) {
-	case BILLING_ID_ACTIVE_GAME:
-		CCLOG("game actived!");
-    // do your logic here
-		break;
-
-    case BILLING_ID_BUY_CAR:
-    // do your logic here
-        break;
-	}
-}
-
-// define your callback function, this should be a global function or a member function of a class
-void HelloWorld::onPaymentResult(int resultCode, int billingId) {
-    CCLOG("billing %i result code %i", billingId, resultCode);
-	switch (resultCode) {
-	case IvySDK::PAYMENT_RESULT_SUCCESS:
-		onPaymentSuccess(billingId);
-		break;
-
-	default:
-		CCLOG("billing %i result code %i", billingId, resultCode);
-		break;
-	}
-}
-
-// call register in your initialize function
-bool HelloWorld::init() {
-  ...
-  IvySDK::registerPaymentCallback(onPaymentResult);
-  ...
-}
-```
-* Notice
-PAYMENT_RESULT* are defined in namespace IvySDK:
-you should NOT define these again
+*banner广告
 ```cpp
-static const int PAYMENT_RESULT_SUCCESS = 0;
-static const int PAYMENT_RESULT_CANCEL = 1;
-static const int PAYMENT_RESULT_FAILURE = 2;
-```
-
-* call doBilling when you want
-```c++
-IvySDK::doBilling(BILLING_ID_ACTIVE_GAME);
-```
-
-## 5, Reward AD
-Reward Ad is a video ad that when the player saw it, you will give him some golds/items/diamonds etc.
-
-when you want to use reward ad, you should do this:
-* register your reward ad callback
-```c++
-#define REWARD_ID_GOLD 1
-#define REWARD_ID_CAR 2
-... etc.
-
-// define your callback function, this should be a global function or a member function of a class
-void onFreecoinResult(bool success, int rewardId) {
-  if (success) {
-    CCLOG("receive reward %i", rewardId);
-    // do your logic here
-    switch(rewardId) {
-      case REWARD_ID_CAR:
-      // do your logic
-      break;
-
-      case REWARD_ID_GOLD:
-      //do your logic
-      break;
-
-      ...
-    }
-  }
-}
-
-// call register in your initialize function
-bool HelloWorld::init() {
-  ...
-  IvySDK::registerFreecoinCallback(onFreecoinResult);
-  ...
-}
-```
-* call showFreeCoin when you want
-```c++
-// determine whether the reward ad is available
-bool has = IvySDK::hasFreeCoin();
-if (has) {
-  // launch reward ad for gold
-  IvySDK::showFreeCoin(REWARD_ID_GOLD);
-}
-```
-
-## 6, SNS
-This module can make these things done:
-* login with facebook
-* logout
-* like your facebook page
-* let the player invite his all friends
-* let the player challenge his all friends
-* get the player's friend list that have played this game
-* get player's profile
-
-If you want to use SNS, you can do this:
-* define sns callback and register it
+ static const int AD_POS_LEFT_TOP = 1;//左上角显示banner广告
+ static const int AD_POS_MIDDLE_TOP = 3;//中间上部显示banner广告
+ static const int AD_POS_RIGHT_TOP = 6;//右上角显示banner广告
+ static const int AD_POS_MIDDLE_MIDDLE = 5;//中间显示banner广告
+ static const int AD_POS_LEFT_BOTTOM = 2;//左下角显示banner广告
+ static const int AD_POS_MIDDLE_BOTTOM = 4;//中间底部显示banner广告
+ static const int AD_POS_RIGHT_BOTTOM = 7;//右下角显示banner广告
+	
+ IvySDK.showBanner("default", IvySDK::AD_POS_MIDDLE_BOTTOM); //居中显示banner广告
+ IvySDK.closeBanner(); //关闭banner广告
+ ```
+##4, fackbook API和回调
+如果你想使用fackbook相关功能，你应该按如下去做:
+* 定义sms回调函数并注册
 ```cpp
 void onReceiveSNSResult(int resultType, bool success, int extra) {
     switch(resultType) {
@@ -282,16 +134,15 @@ void onReceiveSNSResult(int resultType, bool success, int extra) {
     }
 }
 
-// call register in your initialize function
+// 在初始化的时候注册你的回调函数
 bool HelloWorld::init() {
   ...
   IvySDK::registerSNSCallback(onReceiveSNSResult);
   ...
 }
 ```
-* Notice:
-SNS_RESULT* are defined in namespace IvySDK:
-you should NOT define these again
+* 注意:
+SNS_RESULT* 定义在 namespace IvySDK,你不需要重新定义
 ```cpp
 static const int SNS_RESULT_LOGIN = 1;
 static const int SNS_RESULT_INVITE = 2;
@@ -299,31 +150,131 @@ static const int SNS_RESULT_CHALLENGE = 3;
 static const int SNS_RESULT_LIKE = 4;
 ```
 
-* and then you can do this when needed:
-```js
-// login
+* 现在你可以使用如下fackbook相关接口:
+```cpp
+// fackbook登录
 IvySDK::login();
 
-// log out
+//fackbook登出
 IvySDK::logout();
 
-// indicates if the player logged in
+//fackbook是否已经在登录状态
 IvySDK::isLogin();
 
-// let the player to like you
+//fackbook点赞
 IvySDK::like();
 
-// let the player to invite his friends
+// fackbook邀请
 IvySDK::invite();
 
-// let the player to challenge his friends
+// 挑战其他facebook好友
 IvySDK::challenge("challenge you", "speed coming....");
 
-// get the player profile, the result is a json string  {"id":"xxx", "name":"xxx", "picture":"/sdcard/.cache/xxxx"}
+// 获得玩家fackbook数据，返回json字符串 {"id":"xxx", "name":"xxx", "picture":"/sdcard/.cache/xxxx"}
 const char* profileString = IvySDK::me();
 
-// get the player friends profiles, the result is a json array string: [{"id":"xxx", "name":"xxx", "picture":"/sdcard/.cache/xxxx"}, ...]
+// 获得玩家好友的facebook数据，返回json字符串数组: [{"id":"xxx", "name":"xxx", "picture":"/sdcard/.cache/xxxx"}, ...]
 const char* friendString = IvySDK::friends();
+```
+
+## 5, 内付API和回调
+当使用这个接口的时候，你应该按照如下去做：
+* 注册你的支付回调函数
+```c++
+// 定义你的计费id
+#define BILLING_ID_ACTIVE_GAME 1
+#define BILLING_ID_BUY_CAR 2
+
+//处理支付成功后的相应动作
+static void onPaymentSuccess(int billId) {
+	switch (billId) {
+	case BILLING_ID_ACTIVE_GAME:
+		CCLOG("game actived!");
+    // do your logic here
+		break;
+
+    case BILLING_ID_BUY_CAR:
+    // do your logic here
+        break;
+	}
+}
+
+//定义回调函数，这个函数应该是一个全局函数或者是类成员函数
+void HelloWorld::onPaymentResult(int resultCode, int billingId) {
+    CCLOG("billing %i result code %i", billingId, resultCode);
+	switch (resultCode) {
+	case IvySDK::PAYMENT_RESULT_SUCCESS:
+		onPaymentSuccess(billingId);
+		break;
+
+	default:
+		CCLOG("billing %i result code %i", billingId, resultCode);
+		break;
+	}
+}
+
+// 在初始化的时候注册你的回调函数
+bool HelloWorld::init() {
+  ...
+  IvySDK::registerPaymentCallback(onPaymentResult);
+  ...
+}
+```
+* 注意
+PAYMENT_RESULT* 已经被定义在 namespace IvySDK,你不需要重新定义
+```cpp
+static const int PAYMENT_RESULT_SUCCESS = 0;
+static const int PAYMENT_RESULT_CANCEL = 1;
+static const int PAYMENT_RESULT_FAILURE = 2;
+```
+
+* 调用计费接口
+```c++
+IvySDK::pay(BILLING_ID_ACTIVE_GAME);
+```
+
+## 6, 视频广告API和回调
+Reward Ad是一个视频广告,当玩家观看视频后,你可以给予玩家金币/钻石/物品等作为奖励。
+
+当你想使用这个功能的时候，你应该按照如下去做：
+* 注册视频回调函数
+```c++
+#define REWARD_ID_GOLD 1
+#define REWARD_ID_CAR 2
+
+//定义回调函数，这个函数应该是一个全局函数或者是类成员函数
+void onRewardAdResult(bool success, int rewardId) {
+  if (success) {
+    CCLOG("receive reward %i", rewardId);
+    // do your logic here
+    switch(rewardId) {
+      case REWARD_ID_CAR:
+      // do your logic
+      break;
+
+      case REWARD_ID_GOLD:
+      //do your logic
+      break;
+
+      ...
+    }
+  }
+}
+
+// 在初始化的时候注册你的回调函数
+bool HelloWorld::init() {
+  ...
+  IvySDK::registerRewardAdCallback(onFreecoinResult);
+  ...
+}
+```
+* 调用视频接口
+```c++
+// 判断是否支持视频播出
+bool has = IvySDK::hasRewardAd();
+if (has) {
+  IvySDK::showRewardAd(REWARD_ID_GOLD);
+}
 ```
 
 ## 7, NativeAds
