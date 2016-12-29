@@ -1,16 +1,14 @@
 # RiseSDK for cocos2d-x
 ## Version: 3.2
 
-## 1, Copy files and init in Activity
+## 1, 复制文件并初始化Activity
 
-* copy Classes and proj.android to your Cocos2d-x project folder corresponding
-* before:
-<center>![before copy](assets/risesdk-cocos-89d68.png)</center>
-* after:
-<center>![after copy](assets/risesdk-cocos-1ed0e.png)</center>
-<center>![after copy](assets/risesdk-cocos-db52d.png)</center>
+* 复制demo下IvySDK.h和IvySDK.cpp到项目所在源码目录下
+<center>![before copy](assets/2.png)</center>
+* 复制demo下risesdk.jar到游戏项目同目录下
+<center>![after copy](assets/1.png)</center>
 
-* init in your main activity
+* 初始化activity
 ```java
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +41,7 @@
     }
 ```
 
-* if you use proguard to obfuscate your java source code, you should add these rules to your proguard rules file:
+* 如果您有使用proguard来混淆Java代码，需要添加以下规则：
 ```java
 -dontwarn com.unity3d.**
 -keep class com.android.client.** {
@@ -72,7 +70,7 @@
 
 ```
 
-## 2, add IvySDK.cpp to your Android.mk file
+## 2, 添加IvySDK.cpp到Android.mk文件
 ![add src](assets/risesdk-cocos-f91ad.png)
 
 ##3，页面广告API
