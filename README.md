@@ -274,39 +274,14 @@ if (has) {
   IvySDK::showRewardAd(REWARD_ID_GOLD);
 }
 ```
-
-## 7, NativeAds
-When you want to show some ads in your loading stage or pause game stage, you can use this type of ad. This Ad will show in screen position that measured by percentage of the screen height that you want. see blow:
-```cpp
-// show native ad in screen with y position of 80 percent of screen height
-IvySDK::showNativeAd("loading", 80);
-
-// hide native ad when you pass the loading stage
-IvySDK::hideNativeAd("loading");
-
-// you can check is there exists any native ad
-if (IvySDK::hasNativeAd("loading")) {
-  // show loading stage with native ad
-} else {
-  // show loading stage without native ad
-}
-```
-
-## 8, Misc
-* download something and cache it (async)
-* get system configurations
-* query whether installed an app or not
-* launch an app
-* goto play store for an app
-
-Download a bitmap and cache it (without callback)
+## 7, 其他
+下载图片并且缓存(没有回调)
 ```cpp
 const char* path = IvySDK::cacheUrl("http://img.google.com/xxxxxx.png");
 // do your works, you can query the path whether exists or not after 5 seconds
 ```
-
-If you want to cache an url and let the system give you a callback, you can do this
-* define callback
+如果你想缓存一个url并且让系统给你一个回调，你应该这样做：
+* 定义回调函数
 ```cpp
 const int TAG_BITMAP = 1;
 
@@ -318,7 +293,7 @@ void onCacheUrlResult(int tag, bool success, const char* path) {
   }
 }
 
-// call register in your initialize function
+// 在初始化的时候注册你的回调函数
 bool HelloWorld::init() {
   ...
   IvySDK::registerCacheUrlCallback(onCacheUrlResult);
@@ -362,6 +337,6 @@ if (IvySDK::hasApp(appPackageName)) {
 }
 ```
 
-## 9, Congratulations, done.
+## 8, Congratulations, done.
  You will see some toasts when you run your game in your android phone or emulator:
 <center>![toast](assets/risesdk-cocos-a0e84.png)</center>
