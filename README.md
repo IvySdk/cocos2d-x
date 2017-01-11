@@ -274,7 +274,26 @@ if (has) {
   IvySDK::showRewardAd(REWARD_ID_GOLD);
 }
 ```
-## 7, 其他
+## 7, 友盟统计
+```c++
+//统计进入关卡次数,参数为关卡Id，如："levelId_01"代表第一关
+void UM_startLevel(const char* level)
+//统计失败关卡次数
+void UM_failLevel(const char* level)
+//统计完成关卡次数,
+void UM_finishLevel(const char* level)
+//统计角色等级,参数为角色等级
+void UM_setPlayerLevel(int levelId)
+//统计进入页面次数,参数为页面名称 如："mainPage"
+void UM_onPageStart(const char* pageName)
+//统计离开页面次数,
+void UM_onPageEnd(const char* pageName)
+//统计自定义事件 如:"onclick" 可以统计点击次数
+void UM_onEvent(const char* eventId)
+//统计自定义时间，如："button1","onclick"可以统计点击button1的点击次数
+void UM_onEvent(const char* eventId, const char* tag)
+```
+## 8, 其他
 下载图片并且缓存(没有回调)
 ```cpp
 const char* path = IvySDK::cacheUrl("http://img.google.com/xxxxxx.png");
@@ -336,7 +355,3 @@ if (IvySDK::hasApp(appPackageName)) {
   IvySDK::getApp(appPackageName);
 }
 ```
-
-## 8, Congratulations, done.
- You will see some toasts when you run your game in your android phone or emulator:
-<center>![toast](assets/risesdk-cocos-a0e84.png)</center>
