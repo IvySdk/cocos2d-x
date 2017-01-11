@@ -3,7 +3,7 @@
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
 namespace IvySDK {
     onPaymentResult paymentCallback_;
-    onFreecoinResult freeCoinCallback_;
+    onRewardAdResult rewardAdCallback_;
     onSNSResult snsCallback_;
     onLeaderBoardResult leaderBoardCallback_;
     onServerResult serverCallback_;
@@ -25,8 +25,8 @@ extern "C" {
     
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_rr(JNIEnv* env, jclass clazz, jboolean success, jint rewardId) {
         CCLOG("receive free coins");
-        if (IvySDK::freeCoinCallback_ != 0)
-            IvySDK::freeCoinCallback_(success, rewardId);
+        if (IvySDK::rewardAdCallback_ != 0)
+            IvySDK::rewardAdCallback_(success, rewardId);
     }
     
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_sns(JNIEnv* env, jclass clazz, jint msg, jboolean success, jint extra){

@@ -27,14 +27,17 @@ void HelloWorld::onPaymentResult(int resultCode, int billingId) {
 	case IvySDK::PAYMENT_RESULT_SUCCESS:
 		onPaymentSuccess(billingId);
 		break;
-
+	case IvySDK::PAYMENT_RESULT_FAILURE:
+		break;
+	case IvySDK::PAYMENT_RESULT_CANCEL:
+		break;
 	default:
 		CCLOG("billing %i result code %i", billingId, resultCode);
 		break;
 	}
 }
 
-void onFreecoinResult(bool success, int coins) {
+void onRewardAdResult(bool success, int coins) {
     CCLOG("free coin: success? %s and I get %i coins", success? "true" : "false", coins);
 }
 
@@ -146,7 +149,7 @@ bool HelloWorld::init() {
 	
 	CCMenuItemFont::setFontSize(11);
 	IvySDK::registerPaymentCallback(onPaymentResult);
-	IvySDK::registerFreecoinCallback(onFreecoinResult);
+	IvySDK::registerRewardAdCallback(onRewardAdResult);
     IvySDK::registerSNSCallback(onReceiveSNSResult);
     IvySDK::registerCacheUrlCallback(onCacheUrlResult);
 //    IvySDK::registerLeaderBoardCallback(onReceiveLeaderboardResult);
@@ -172,7 +175,7 @@ bool HelloWorld::init() {
 	float px = origin.x + 40;
 
 	ccMenuCallback handler = CC_CALLBACK_1(HelloWorld::AdButtonClicked, this);
-    const int label_size = 31;
+    const int label_size = 38;
     const char* labels[label_size] = {
         "Pause AD", // 1
         "PassLevel",// 2
@@ -182,7 +185,7 @@ bool HelloWorld::init() {
         "Close Banner",// 6
         "Share", // 7
         "MoreGame", // 8
-        "Freecoin", // 9
+        "RewardAd", // 9
         "Pay", // 10
         "Get Data", // 11
         "Track Event", // 12
@@ -205,6 +208,13 @@ bool HelloWorld::init() {
         "get app id", //29
         "cache url", //30
         "cache url tag", //31
+		"UM_startLevel",//32
+		"UM_failLevel",//33
+		"UM_finishLevel",//34
+		"UM_PlayerLevel",//35
+		"UM_PageStart",//36
+		"UM_PageEnd",//37
+		"UM_onEvent"//38
     };
     
     int xOffset = 0;
@@ -215,12 +225,12 @@ bool HelloWorld::init() {
         laber1->setPosition(ccp(px + xOffset, py - yOffset));
         laber1->setTag(i+1);
         CCMenu *menu1 = CCMenu::create(laber1, NULL);
-        menu1->setPosition(CCPointZero);
+        menu1->setPosition(Vec2(0, 0));
         addChild(menu1, 3);
         
         yOffset += 20;
         if (yOffset > 200) {
-            xOffset += 80;
+            xOffset += 100;
             yOffset = 0;
         }
     }
@@ -231,81 +241,69 @@ bool HelloWorld::init() {
 void HelloWorld::AdButtonClicked(Ref* ref) {
 	int tag = static_cast<CCMenu*>(ref)->getTag();
 	switch (tag) {
-	case 1:// Show Pause Ad
-		IvySDK::showInterstitial(IvySDK::AD_POS_GAME_PAUSE);
-		break;
-	case 2:// Show Passlevel Ad
-		IvySDK::showInterstitial(IvySDK::AD_POS_GAME_PASSLEVEL);
-		break;
-	case 3:// Show Custom Ad
-		IvySDK::showInterstitial(IvySDK::AD_POS_GAME_CUSTOM);
-		break;
-	case 4:// Show Exit Ad
-		IvySDK::onQuit();
-		break;
-	case 5:// Show Banner
-		IvySDK::showBanner("default", IvySDK::AD_POS_MIDDLE_TOP);
-		break;
-	case 6:// Close Banner
-		IvySDK::closeBanner();
-		break;
-	case 7:// Share
-		IvySDK::share();
-		break;
-	case 8:// More Game
-		IvySDK::showMoreGame();
-		break;
-	case 9:// Show Free Coin
-		IvySDK::showFreeCoin("default", 1);
-		break;
-	case 10:// Do billing
-		IvySDK::doBilling(BILLING_ID_ACTIVE_GAME);
-		break;
-            
+		case 1:// 暂停广告
+			IvySDK::showFullAd(IvySDK::AD_POS_GAME_PAUSE);
+			break;
+		case 2:// 过关广告
+			IvySDK::showFullAd(IvySDK::AD_POS_GAME_PASSLEVEL);
+			break;
+		case 3:// 自定义广告
+			IvySDK::showFullAd(IvySDK::AD_POS_GAME_CUSTOM);
+			break;
+		case 4:// 退出广告
+			IvySDK::onQuit();
+			break;
+		case 5:// Banner广告
+			IvySDK::showBanner("default", IvySDK::AD_POS_MIDDLE_TOP);
+			break;
+		case 6:// 关闭Banner广告
+			IvySDK::closeBanner();
+			break;
+		case 7:// 分享
+			IvySDK::share();
+			break;
+		case 8:// 更多游戏
+			IvySDK::showMoreGame();
+			break;
+		case 9:// 视频广告
+			IvySDK::showRewardAd("default", 1);
+			break;
+		case 10:// 支付
+			IvySDK::pay(BILLING_ID_ACTIVE_GAME);
+			break;      
         case 11:
             CCLOG("extra data: %s", IvySDK::getExtraData());
-            break;
-            
+            break;      
         case 12:
             IvySDK::trackEvent("test category", "test action", "test label", 3);
-            break;
-            
-        case 13:
+            break;        
+        case 13://给应用，游戏等五星好评
             IvySDK::rateUs();
-            break;
-            
-        case 14:
+            break;          
+        case 14://登陆facebook账户
             IvySDK::login();
-            break;
-            
-        case 15:
+            break;           
+        case 15://退出facebook账户
             IvySDK::logout();
-            break;
-            
-        case 16:
+            break;         
+        case 16://是否登陆facebook账户
             CCLOG("isLogin: %s", IvySDK::isLogin() ? "true": "false");
-            break;
-            
-        case 17:
+            break;         
+        case 17://facebook点赞
             IvySDK::like();
-            break;
-            
-        case 18:
+            break;        
+        case 18://向你的facebook朋友发出挑战
             IvySDK::challenge("wa challenge", "speed come with me");
-            break;
-            
-        case 19:
+            break;        
+        case 19://获取我的faceook个人信息
             CCLOG("me is %s", IvySDK::me());
-            break;
-            
-        case 20:
+            break;        
+        case 20://获取faceook朋友信息列表
             CCLOG("friends are: %s", IvySDK::friends());
-            break;
-            
-        case 21:
+            break;          
+        case 21://facebook邀请好友安装应用，游戏等
             IvySDK::invite();
-            break;
-            
+            break;           
 //        case 22:
 //            IvySDK::submitScore("endless", 320, "");
 //            break;
@@ -316,16 +314,13 @@ void HelloWorld::AdButtonClicked(Ref* ref) {
 //            
 //        case 24:
 //            IvySDK::loadGlobalLeaderBoard("endless", 0, 20);
-//            break;
-            
+//            break;           
         case 25:
             IvySDK::showNativeAd("lock_pre", 80);
-            break;
-            
+            break;            
         case 26:
             IvySDK::hideNativeAd("lock_pre");
-            break;
-            
+            break;            
 //        case 27:
 //            IvySDK::showSales(2);
 //            break;
@@ -336,16 +331,34 @@ void HelloWorld::AdButtonClicked(Ref* ref) {
             
         case 29:
             CCLOG("app id is %s", IvySDK::getConfig(IvySDK::CONFIG_KEY_APP_ID));
-            break;
-            
+            break;            
         case 30:
             CCLOG("cached result path is %s", IvySDK::cacheUrl("http://img4.imgtn.bdimg.com/it/u=3087502007,2322343371&fm=21&gp=0.jpg"));
-            break;
-            
+            break;            
         case 31:
             IvySDK::cacheUrl(1, "http://img4.imgtn.bdimg.com/it/u=3087502007,2322343371&fm=21&gp=0.jpg");
             break;
-            
+		case 32:
+			IvySDK::UM_startLevel("level 0");
+			break;
+		case 33:
+			IvySDK::UM_failLevel("level 0");
+			break;
+		case 34:
+			IvySDK::UM_finishLevel("level 0");
+			break;
+		case 35:
+			IvySDK::UM_setPlayerLevel(1);
+			break;
+		case 36:
+			IvySDK::UM_onPageStart("mainPage");
+			break;
+		case 37:
+			IvySDK::UM_onPageEnd("mainPage");
+			break;
+		case 38:
+			IvySDK::UM_onEvent("button1", "onclick");
+			break;
 	default:
 		break;
 	}
