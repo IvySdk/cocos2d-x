@@ -2,6 +2,7 @@
 #define __IvySDK__DEFINED__
 
 #include "cocos2d.h"
+#include <functional>
 using namespace cocos2d;
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
@@ -10,12 +11,19 @@ using namespace cocos2d;
 
 namespace IvySDK
 {
-    typedef void (*onPaymentResult)(int resultCode, int billId);
-    typedef void (*onRewardAdResult)(bool success, int rewardId);
-    typedef void (*onSNSResult)(int msg, bool success, int extra);
-    typedef void (*onLeaderBoardResult)(bool isSubmit, bool success, const char* leaderBoardId, const char* data);
-    typedef void (*onServerResult)(int resultCode, bool success, const char* data);
-    typedef void (*onCacheUrlResult)(int tag, bool success, const char* data);
+	typedef std::function<void(int resultCode, int billId)> onPaymentResult;
+	typedef std::function<void(bool success, int rewardId)> onRewardAdResult;
+	typedef std::function<void(int msg, bool success, int extra)> onSNSResult;
+	typedef std::function<void(bool isSubmit, bool success, const char* leaderBoardId, const char* data)> onLeaderBoardResult;
+	typedef std::function<void(int resultCode, bool success, const char* data)> onServerResult;
+	typedef std::function<void(int tag, bool success, const char* data)> onCacheUrlResult;
+	typedef std::function<void(int tag)> onAdClickedResult;
+	typedef std::function<void(int tag)> onAdClosedResult;
+
+	static const int AD_FULL = 1;
+	static const int AD_VIDEO = 2;
+	static const int AD_BANNER = 3;
+	static const int AD_CROSS = 4;
     
     static const int AD_POS_LEFT_TOP = 1;
     static const int AD_POS_MIDDLE_TOP = 3;
@@ -64,6 +72,8 @@ namespace IvySDK
     extern onLeaderBoardResult leaderBoardCallback_;
     extern onServerResult serverCallback_;
     extern onCacheUrlResult cacheCallback_;
+	extern onAdClickedResult adclickedCallback_;
+	extern onAdClosedResult adclosedCallback_;
     #endif
     
     static void callVoidMethod(const char* method) {
@@ -490,6 +500,10 @@ namespace IvySDK
     static void showSales(int saleId) {
         callVoidIntMethod("showSales", saleId);
     }
+
+	static void query(int idx = -1) {
+		callVoidIntMethod("query", idx);
+	}
     
     static void verifyCode(const char* code) {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
@@ -567,6 +581,20 @@ namespace IvySDK
         serverCallback_ = callback;
 #endif
     }
+
+	static void registerAdClickedCallback(onAdClickedResult callback)
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		adclickedCallback_ = callback;
+#endif
+	}
+
+	static void registerAdClosedCallback(onAdClosedResult callback)
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		adclosedCallback_ = callback;
+#endif
+	}
     
     static const char* getConfig(int configKey) {
         return callIntUTFMethod("getConfig", "", configKey);
@@ -721,6 +749,8 @@ extern "C"
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_lb(JNIEnv* env, jclass clazz, jboolean submit, jboolean success, jstring leaderBoardId, jstring ex);
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_sr(JNIEnv* env, jclass clazz, jint resultCode, jboolean success, jstring ex);
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_url(JNIEnv* env, jclass clazz, jint tag, jboolean success, jstring ex);
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awc(JNIEnv* env, jclass clazz, jint tag);
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awd(JNIEnv* env, jclass clazz, jint tag);
 #ifdef __cplusplus
 }
 #endif
