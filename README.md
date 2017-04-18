@@ -4,9 +4,9 @@
 ## 1, 复制文件并初始化Activity
 
 * 复制demo下IvySDK.h和IvySDK.cpp到项目所在源码目录下
-<center>![before copy](assets/2.png)</center>
+![Copy](assets/2.png)
 * 复制demo下risesdk.jar到游戏项目同目录下
-<center>![after copy](assets/1.png)</center>
+![Copy](assets/1.png)
 
 * 初始化activity
 ```java
