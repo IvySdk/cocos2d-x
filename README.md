@@ -1,4 +1,6 @@
 # RiseSDK for cocos2d-x
+
+## 英文版链接：https://github.com/IvySdk/cocos2d-x/wiki/English-Doc
 ## Version: 3.2
 
 ## 1, 复制文件并初始化Activity
