@@ -321,7 +321,14 @@ bool HelloWorld::init() {
   ...
 }
 ```
-
+* 游戏，应用程序退出
+```cpp
+IvySDK::onQuit();
+```
+* 评价
+```cpp
+IvySDK::rateUs();
+```
 * 下载
 ```cpp
 // download a bitmap and cache it with callback
