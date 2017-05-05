@@ -2,6 +2,7 @@
 #define __IvySDK__DEFINED__
 
 #include "cocos2d.h"
+#include <functional>
 using namespace cocos2d;
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
@@ -10,12 +11,19 @@ using namespace cocos2d;
 
 namespace IvySDK
 {
-    typedef void (*onPaymentResult)(int resultCode, int billId);
-    typedef void (*onFreecoinResult)(bool success, int rewardId);
-    typedef void (*onSNSResult)(int msg, bool success, int extra);
-    typedef void (*onLeaderBoardResult)(bool isSubmit, bool success, const char* leaderBoardId, const char* data);
-    typedef void (*onServerResult)(int resultCode, bool success, const char* data);
-    typedef void (*onCacheUrlResult)(int tag, bool success, const char* data);
+	typedef std::function<void(int resultCode, int billId)> onPaymentResult;
+	typedef std::function<void(bool success, int rewardId)> onRewardAdResult;
+	typedef std::function<void(int msg, bool success, int extra)> onSNSResult;
+	typedef std::function<void(bool isSubmit, bool success, const char* leaderBoardId, const char* data)> onLeaderBoardResult;
+	typedef std::function<void(int resultCode, bool success, const char* data)> onServerResult;
+	typedef std::function<void(int tag, bool success, const char* data)> onCacheUrlResult;
+	typedef std::function<void(int tag)> onAdClickedResult;
+	typedef std::function<void(int tag)> onAdClosedResult;
+
+	static const int AD_FULL = 1;
+	static const int AD_VIDEO = 2;
+	static const int AD_BANNER = 3;
+	static const int AD_CROSS = 4;
     
     static const int AD_POS_LEFT_TOP = 1;
     static const int AD_POS_MIDDLE_TOP = 3;
@@ -59,11 +67,13 @@ namespace IvySDK
     #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
     static const char* sdkClassName_ = "com/android/client/Cocos";
     extern onPaymentResult paymentCallback_;
-    extern onFreecoinResult freeCoinCallback_;
+    extern onRewardAdResult rewardAdCallback_;
     extern onSNSResult snsCallback_;
     extern onLeaderBoardResult leaderBoardCallback_;
     extern onServerResult serverCallback_;
     extern onCacheUrlResult cacheCallback_;
+	extern onAdClickedResult adclickedCallback_;
+	extern onAdClosedResult adclosedCallback_;
     #endif
     
     static void callVoidMethod(const char* method) {
@@ -79,13 +89,13 @@ namespace IvySDK
 #endif
     }
     
-    static bool callVoidUTFMethod(const char* method, const char* p) {
+    static void callVoidUTFMethod(const char* method, const char* p) {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
         JniMethodInfo methodInfo;
         if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, method, "(Ljava/lang/String;)V"))
         {
             CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
-            return false;
+			return;
         }
         jstring tag = methodInfo.env->NewStringUTF(p);
         methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, tag);
@@ -197,7 +207,7 @@ namespace IvySDK
 #endif
     }
 
-    static void showInterstitial(const char* pos)
+    static void showFullAd(const char* pos)
     {
         #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
         JniMethodInfo methodInfo;
@@ -307,17 +317,17 @@ namespace IvySDK
         callVoidMethod("moreGame");
     }
     
-    static void showFreeCoin(int rewardId)
+    static void showRewardAd(int rewardId)
     {
         callVoidIntMethod("showRewardAd", rewardId);
     }
     
-    static bool hasFreeCoin()
+    static bool hasRewardAd()
     {
         return callBooleanMethod("hasRewardAd");
     }
     
-    static void showFreeCoin(const char* tag, int rewardId)
+    static void showRewardAd(const char* tag, int rewardId)
     {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
         JniMethodInfo methodInfo;
@@ -333,7 +343,7 @@ namespace IvySDK
 #endif
     }
     
-    static bool hasFreeCoin(const char* tag)
+    static bool hasRewardAd(const char* tag)
     {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
         JniMethodInfo methodInfo;
@@ -376,7 +386,7 @@ namespace IvySDK
         callVoidMethod("share");
     }
 
-    static void doBilling(int billingId)
+    static void pay(int billingId)
     {
         callVoidIntMethod("pay", billingId);
     }
@@ -490,6 +500,10 @@ namespace IvySDK
     static void showSales(int saleId) {
         callVoidIntMethod("showSales", saleId);
     }
+
+	static void query(int idx = -1) {
+		callVoidIntMethod("query", idx);
+	}
     
     static void verifyCode(const char* code) {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
@@ -525,17 +539,18 @@ namespace IvySDK
 #endif
     }
     
+	//注册支付回调函数
     static void registerPaymentCallback(onPaymentResult callback)
     {
         #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
         paymentCallback_ = callback;
         #endif
     }
-    
-    static void registerFreecoinCallback(onFreecoinResult callback)
+    //注册展示视频广告回调
+    static void registerRewardAdCallback(onRewardAdResult callback)
     {
         #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-        freeCoinCallback_ = callback;
+		rewardAdCallback_ = callback;
         #endif
     }
     
@@ -566,6 +581,20 @@ namespace IvySDK
         serverCallback_ = callback;
 #endif
     }
+
+	static void registerAdClickedCallback(onAdClickedResult callback)
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		adclickedCallback_ = callback;
+#endif
+	}
+
+	static void registerAdClosedCallback(onAdClosedResult callback)
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		adclosedCallback_ = callback;
+#endif
+	}
     
     static const char* getConfig(int configKey) {
         return callIntUTFMethod("getConfig", "", configKey);
@@ -600,6 +629,112 @@ namespace IvySDK
     static void launchApp(const char* packageName) {
         callVoidUTFMethod("launchApp", packageName);
     }
+
+	static void UM_setPlayerLevel(int levelId) {
+		callVoidIntMethod("UM_setPlayerLevel", levelId);
+	}
+
+	static void UM_onPageStart(const char* pageName) {
+		callVoidUTFMethod("UM_onPageStart", pageName);
+	}
+
+	static void UM_onPageEnd(const char* pageName) {
+		callVoidUTFMethod("UM_onPageEnd", pageName);
+	}
+
+	static void UM_onEvent(const char* eventId) {
+		callVoidUTFMethod("UM_onEvent", eventId);
+	}
+
+	static void UM_onEvent(const char* eventId, const char* tag) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "UM_onEvent", "(Ljava/lang/String;Ljava/lang/String;)V"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return;
+		}
+		jstring c = methodInfo.env->NewStringUTF(eventId);
+		jstring a = methodInfo.env->NewStringUTF(tag);
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, c, a);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(c);
+		methodInfo.env->DeleteLocalRef(a);
+#endif
+	}
+
+	static void UM_startLevel(const char* level) {
+		callVoidUTFMethod("UM_startLevel", level);
+	}
+
+	static void UM_failLevel(const char* level) {
+		callVoidUTFMethod("UM_failLevel", level);
+	}
+
+
+	static void UM_finishLevel(const char* level) {
+		callVoidUTFMethod("UM_finishLevel", level);
+	}
+
+	static void UM_pay(double money, const char* itemName, int number, double price) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "UM_pay", "(DLjava/lang/String;ID)V"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return;
+		}
+		jstring a = methodInfo.env->NewStringUTF(itemName);
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, money, a, number, price);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(a);
+#endif
+	}
+
+	static void UM_buy(const char* itemName, int count, double price) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "UM_buy", "(Ljava/lang/String;ID)V"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return;
+		}
+		jstring a = methodInfo.env->NewStringUTF(itemName);
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, a, count, price);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(a);
+#endif
+	}
+
+	static void UM_use(const char* itemName, int number, double price) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "UM_use", "(Ljava/lang/String;ID)V"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return;
+		}
+		jstring a = methodInfo.env->NewStringUTF(itemName);
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, a, number, price);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(a);
+#endif
+	}
+
+	static void UM_bonus(const char* itemName, int number, double price, int trigger) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "UM_bonus", "(java/lang/String;IDI)V"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return;
+		}
+		jstring a = methodInfo.env->NewStringUTF(itemName);
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, a, number, price, trigger);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(a);
+#endif
+	}
 }
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
@@ -614,6 +749,8 @@ extern "C"
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_lb(JNIEnv* env, jclass clazz, jboolean submit, jboolean success, jstring leaderBoardId, jstring ex);
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_sr(JNIEnv* env, jclass clazz, jint resultCode, jboolean success, jstring ex);
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_url(JNIEnv* env, jclass clazz, jint tag, jboolean success, jstring ex);
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awc(JNIEnv* env, jclass clazz, jint tag);
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awd(JNIEnv* env, jclass clazz, jint tag);
 #ifdef __cplusplus
 }
 #endif

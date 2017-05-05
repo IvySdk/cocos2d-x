@@ -3,11 +3,13 @@
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
 namespace IvySDK {
     onPaymentResult paymentCallback_;
-    onFreecoinResult freeCoinCallback_;
+    onRewardAdResult rewardAdCallback_;
     onSNSResult snsCallback_;
     onLeaderBoardResult leaderBoardCallback_;
     onServerResult serverCallback_;
     onCacheUrlResult cacheCallback_;
+	onAdClickedResult adclickedCallback_;
+	onAdClosedResult adclosedCallback_;
 }
 #ifdef __cplusplus
 extern "C" {
@@ -25,8 +27,8 @@ extern "C" {
     
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_rr(JNIEnv* env, jclass clazz, jboolean success, jint rewardId) {
         CCLOG("receive free coins");
-        if (IvySDK::freeCoinCallback_ != 0)
-            IvySDK::freeCoinCallback_(success, rewardId);
+        if (IvySDK::rewardAdCallback_ != 0)
+            IvySDK::rewardAdCallback_(success, rewardId);
     }
     
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_sns(JNIEnv* env, jclass clazz, jint msg, jboolean success, jint extra){
@@ -65,6 +67,20 @@ extern "C" {
             IvySDK::cacheCallback_(tag, success, extra);
         }
     }
+
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awc(JNIEnv* env, jclass clazz, jint tag) {
+		CCLOG("receive url result: %d", tag);
+		if (IvySDK::adclickedCallback_ != 0) {
+			IvySDK::adclickedCallback_(tag);
+		}
+	}
+
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awd(JNIEnv* env, jclass clazz, jint tag) {
+		CCLOG("receive url result: %d", tag);
+		if (IvySDK::adclosedCallback_ != 0) {
+			IvySDK::adclosedCallback_(tag);
+		}
+	}
 #ifdef __cplusplus
 }
 #endif
