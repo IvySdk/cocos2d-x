@@ -8,6 +8,8 @@ namespace IvySDK {
     onLeaderBoardResult leaderBoardCallback_;
     onServerResult serverCallback_;
     onCacheUrlResult cacheCallback_;
+	onAdClickedResult adclickedCallback_;
+	onAdClosedResult adclosedCallback_;
 }
 #ifdef __cplusplus
 extern "C" {
@@ -65,6 +67,20 @@ extern "C" {
             IvySDK::cacheCallback_(tag, success, extra);
         }
     }
+
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awc(JNIEnv* env, jclass clazz, jint tag) {
+		CCLOG("receive url result: %d", tag);
+		if (IvySDK::adclickedCallback_ != 0) {
+			IvySDK::adclickedCallback_(tag);
+		}
+	}
+
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awd(JNIEnv* env, jclass clazz, jint tag) {
+		CCLOG("receive url result: %d", tag);
+		if (IvySDK::adclosedCallback_ != 0) {
+			IvySDK::adclosedCallback_(tag);
+		}
+	}
 #ifdef __cplusplus
 }
 #endif
