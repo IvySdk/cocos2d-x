@@ -75,9 +75,9 @@
 ## 2, 添加IvySDK.cpp到Android.mk文件
 ![add src](assets/risesdk-cocos-f91ad.png)
 
-##3，页面广告API
+## 3，页面广告API
 
-*全屏广告，需配置不同时机弹出的广告，以便于后台统计,我们预定义了以下几种时机弹出的广告：
+* 全屏广告，需配置不同时机弹出的广告，以便于后台统计,我们预定义了以下几种时机弹出的广告：
 ```cpp
 IvySDK::showFullAd(IvySDK::AD_POS_GAME_START); //游戏开始时
 IvySDK::showFullAd(IvySDK::AD_POS_GAME_PAUSE); //游戏暂停
@@ -87,7 +87,7 @@ IvySDK::showFullAd(IvySDK::AD_POS_GAME_CUSTOM); //您还使用自定义类型广
 ```
 注意：以上类型广告的弹出不要在activity的生命周期onResume()和onPause()中调用
 
-*banner广告
+* banner广告
 ```cpp
  static const int AD_POS_LEFT_TOP = 1;//左上角显示banner广告
  static const int AD_POS_MIDDLE_TOP = 3;//中间上部显示banner广告
@@ -100,7 +100,7 @@ IvySDK::showFullAd(IvySDK::AD_POS_GAME_CUSTOM); //您还使用自定义类型广
  IvySDK.showBanner("default", IvySDK::AD_POS_MIDDLE_BOTTOM); //居中显示banner广告
  IvySDK.closeBanner(); //关闭banner广告
  ```
-##4, fackbook API和回调
+## 4, fackbook API和回调
 如果你想使用fackbook相关功能，你应该按如下去做:
 * 定义sms回调函数并注册
 ```cpp
