@@ -17,8 +17,8 @@ namespace IvySDK
 	typedef std::function<void(bool isSubmit, bool success, const char* leaderBoardId, const char* data)> onLeaderBoardResult;
 	typedef std::function<void(int resultCode, bool success, const char* data)> onServerResult;
 	typedef std::function<void(int tag, bool success, const char* data)> onCacheUrlResult;
-	typedef std::function<void(int tag)> onAdClickedResult;
-	typedef std::function<void(int tag)> onAdClosedResult;
+	typedef std::function<void(int adtype, const char* tag)> onAdClickedResult;
+	typedef std::function<void(int adtype, const char* tag)> onAdClosedResult;
 
 	static const int AD_FULL = 1;
 	static const int AD_VIDEO = 2;
@@ -749,8 +749,8 @@ extern "C"
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_lb(JNIEnv* env, jclass clazz, jboolean submit, jboolean success, jstring leaderBoardId, jstring ex);
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_sr(JNIEnv* env, jclass clazz, jint resultCode, jboolean success, jstring ex);
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_url(JNIEnv* env, jclass clazz, jint tag, jboolean success, jstring ex);
-	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awc(JNIEnv* env, jclass clazz, jint tag);
-	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awd(JNIEnv* env, jclass clazz, jint tag);
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awc(JNIEnv* env, jclass clazz, jint adType, jstring tag);
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awd(JNIEnv* env, jclass clazz, jint adType, jstring tag);
 #ifdef __cplusplus
 }
 #endif
