@@ -19,6 +19,7 @@ namespace IvySDK
 	typedef std::function<void(int tag, bool success, const char* data)> onCacheUrlResult;
 	typedef std::function<void(int adtype, const char* tag)> onAdClickedResult;
 	typedef std::function<void(int adtype, const char* tag)> onAdClosedResult;
+	typedef std::function<void(const char* tag, bool success)> onAdLoadResult;
 
 	static const int AD_FULL = 1;
 	static const int AD_VIDEO = 2;
@@ -74,6 +75,7 @@ namespace IvySDK
     extern onCacheUrlResult cacheCallback_;
 	extern onAdClickedResult adclickedCallback_;
 	extern onAdClosedResult adclosedCallback_;
+	extern onAdLoadResult adloadCallback_;
     #endif
     
     static void callVoidMethod(const char* method) {
@@ -207,21 +209,37 @@ namespace IvySDK
 #endif
     }
 
-    static void showFullAd(const char* pos)
-    {
-        #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-        JniMethodInfo methodInfo;
+	static void showFullAd(const char* pos)
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
 		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "showFullAd", "(Ljava/lang/String;)V"))
 		{
 			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
 			return;
 		}
-        jstring tag = methodInfo.env->NewStringUTF(pos);
+		jstring tag = methodInfo.env->NewStringUTF(pos);
 		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, tag);
 		methodInfo.env->DeleteLocalRef(methodInfo.classID);
-        methodInfo.env->DeleteLocalRef(tag);
-    	#endif
-    }
+		methodInfo.env->DeleteLocalRef(tag);
+#endif
+	}
+
+	static void loadFullAd(const char* pos)
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "loadFullAd", "(Ljava/lang/String;)V"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return;
+		}
+		jstring tag = methodInfo.env->NewStringUTF(pos);
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, tag);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(tag);
+#endif
+	}
     
     static void showBanner(const char* tag, int pos)
     {
@@ -751,6 +769,7 @@ extern "C"
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_url(JNIEnv* env, jclass clazz, jint tag, jboolean success, jstring ex);
 	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awc(JNIEnv* env, jclass clazz, jint adType, jstring tag);
 	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awd(JNIEnv* env, jclass clazz, jint adType, jstring tag);
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_lar(JNIEnv* env, jclass clazz, jstring tag, jboolean success);
 #ifdef __cplusplus
 }
 #endif
