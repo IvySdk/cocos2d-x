@@ -11,6 +11,8 @@ namespace IvySDK {
 	onAdClickedResult adclickedCallback_;
 	onAdClosedResult adclosedCallback_;
 	onAdLoadResult adloadCallback_;
+	onPaymentErrorResult paymentErrorCallback_;
+	onReceiveBillPricesResult receiveBillPricesCallback_;
 }
 #ifdef __cplusplus
 extern "C" {
@@ -93,6 +95,22 @@ extern "C" {
 			const char* extra = env->GetStringUTFChars(tag, 0);
 			env->DeleteLocalRef(tag);
 			IvySDK::adloadCallback_(extra, success);
+		}
+	}
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_pe(JNIEnv* env, jclass clazz, jstring error) {
+		CCLOG("receive url result: %d", error);
+		if (IvySDK::adloadCallback_ != nullptr) {
+			const char* extra = env->GetStringUTFChars(error, 0);
+			env->DeleteLocalRef(error);
+			IvySDK::paymentErrorCallback_(extra);
+		}
+	}
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_ps(JNIEnv* env, jclass clazz, jstring prices) {
+		CCLOG("receive url result: %d", prices);
+		if (IvySDK::adloadCallback_ != nullptr) {
+			const char* extra = env->GetStringUTFChars(prices, 0);
+			env->DeleteLocalRef(prices);
+			IvySDK::receiveBillPricesCallback_(extra);
 		}
 	}
 #ifdef __cplusplus
