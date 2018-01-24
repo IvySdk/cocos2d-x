@@ -17,8 +17,11 @@ namespace IvySDK
 	typedef std::function<void(bool isSubmit, bool success, const char* leaderBoardId, const char* data)> onLeaderBoardResult;
 	typedef std::function<void(int resultCode, bool success, const char* data)> onServerResult;
 	typedef std::function<void(int tag, bool success, const char* data)> onCacheUrlResult;
-	typedef std::function<void(int tag)> onAdClickedResult;
-	typedef std::function<void(int tag)> onAdClosedResult;
+	typedef std::function<void(int adtype, const char* tag)> onAdClickedResult;
+	typedef std::function<void(int adtype, const char* tag)> onAdClosedResult;
+	typedef std::function<void(const char* tag, bool success)> onAdLoadResult;
+	typedef std::function<void(const char* error)> onPaymentErrorResult;
+	typedef std::function<void(const char* prices)> onReceiveBillPricesResult;
 
 	static const int AD_FULL = 1;
 	static const int AD_VIDEO = 2;
@@ -74,6 +77,9 @@ namespace IvySDK
     extern onCacheUrlResult cacheCallback_;
 	extern onAdClickedResult adclickedCallback_;
 	extern onAdClosedResult adclosedCallback_;
+	extern onAdLoadResult adloadCallback_;
+	extern onPaymentErrorResult paymentErrorCallback_;
+	extern onReceiveBillPricesResult receiveBillPricesCallback_;
     #endif
     
     static void callVoidMethod(const char* method) {
@@ -207,21 +213,37 @@ namespace IvySDK
 #endif
     }
 
-    static void showFullAd(const char* pos)
-    {
-        #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-        JniMethodInfo methodInfo;
+	static void showFullAd(const char* pos)
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
 		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "showFullAd", "(Ljava/lang/String;)V"))
 		{
 			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
 			return;
 		}
-        jstring tag = methodInfo.env->NewStringUTF(pos);
+		jstring tag = methodInfo.env->NewStringUTF(pos);
 		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, tag);
 		methodInfo.env->DeleteLocalRef(methodInfo.classID);
-        methodInfo.env->DeleteLocalRef(tag);
-    	#endif
-    }
+		methodInfo.env->DeleteLocalRef(tag);
+#endif
+	}
+
+	static void loadFullAd(const char* pos)
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "loadFullAd", "(Ljava/lang/String;)V"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return;
+		}
+		jstring tag = methodInfo.env->NewStringUTF(pos);
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, tag);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(tag);
+#endif
+	}
     
     static void showBanner(const char* tag, int pos)
     {
@@ -347,7 +369,7 @@ namespace IvySDK
     {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
         JniMethodInfo methodInfo;
-        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "hasRewardAd", "(Ljava/lang/String;)V"))
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "hasRewardAd", "(Ljava/lang/String;)Z"))
         {
             CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
             return false;
@@ -749,8 +771,11 @@ extern "C"
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_lb(JNIEnv* env, jclass clazz, jboolean submit, jboolean success, jstring leaderBoardId, jstring ex);
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_sr(JNIEnv* env, jclass clazz, jint resultCode, jboolean success, jstring ex);
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_url(JNIEnv* env, jclass clazz, jint tag, jboolean success, jstring ex);
-	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awc(JNIEnv* env, jclass clazz, jint tag);
-	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awd(JNIEnv* env, jclass clazz, jint tag);
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awc(JNIEnv* env, jclass clazz, jint adType, jstring tag);
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awd(JNIEnv* env, jclass clazz, jint adType, jstring tag);
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_lar(JNIEnv* env, jclass clazz, jstring tag, jboolean success);
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_pe(JNIEnv* env, jclass clazz, jstring error);
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_ps(JNIEnv* env, jclass clazz, jstring prices);
 #ifdef __cplusplus
 }
 #endif
