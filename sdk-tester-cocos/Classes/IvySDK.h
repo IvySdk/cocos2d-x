@@ -264,7 +264,7 @@ namespace IvySDK
     
     static void showBanner(int pos)
     {
-        #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
         JniMethodInfo methodInfo;
 		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "showBanner", "(I)V"))
 		{
@@ -273,7 +273,7 @@ namespace IvySDK
 		}
 		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, pos);
 		methodInfo.env->DeleteLocalRef(methodInfo.classID);
-    	#endif
+#endif
     }
 
     static void closeBanner()
@@ -338,6 +338,16 @@ namespace IvySDK
     {
         callVoidMethod("moreGame");
     }
+	
+	static bool isNetworkConnected()
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        return callBooleanMethod("isNetworkConnected");
+#else
+        return false;
+#endif
+	}
+	
     
     static void showRewardAd(int rewardId)
     {
@@ -383,6 +393,23 @@ namespace IvySDK
         return false;
 #endif
     }
+	
+		static void track(const char* category, const char* action) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "track", "(Ljava/lang/String;Ljava/lang/String;)V"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return;
+		}
+		jstring c = methodInfo.env->NewStringUTF(category);
+		jstring a = methodInfo.env->NewStringUTF(action);
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, c, a);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(c);
+		methodInfo.env->DeleteLocalRef(a);
+#endif
+	}
     
     static void trackEvent(const char* category, const char* action, const char* label, int value) {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
@@ -564,16 +591,16 @@ namespace IvySDK
 	//注册支付回调函数
     static void registerPaymentCallback(onPaymentResult callback)
     {
-        #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
         paymentCallback_ = callback;
-        #endif
+#endif
     }
     //注册展示视频广告回调
     static void registerRewardAdCallback(onRewardAdResult callback)
     {
-        #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
 		rewardAdCallback_ = callback;
-        #endif
+#endif
     }
     
     static void registerSNSCallback(onSNSResult callback)
