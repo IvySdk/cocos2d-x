@@ -328,6 +328,34 @@ namespace IvySDK
         methodInfo.env->DeleteLocalRef(tag);
 #endif
     }
+	
+	static bool showNativeBanner(const char* tag, int xPrecent, int yPercent, const char* configFile)
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "showNativeBanner", "(Ljava/lang/String;IILjava/lang/String;)Z"))
+		{
+			CCLOG("%s%d: error to get methodInfo###################", __FILE__, __LINE__);
+			return false;
+		}
+		jstring tag1 = methodInfo.env->NewStringUTF(tag);
+		jstring tag2 = methodInfo.env->NewStringUTF(configFile);
+		bool result = methodInfo.env->CallStaticBooleanMethod(methodInfo.classID, methodInfo.methodID, tag1, xPrecent, yPercent, tag2);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(tag1);
+		methodInfo.env->DeleteLocalRef(tag2);
+		return result;
+#else
+		return false;
+#endif
+	}
+
+	static void closeNativeBanner(const char* tag)
+	{
+#if (CC_TARGET_PLATFORM==CC_PLATFORM_ANDROID)
+		callVoidUTFMethod("closeNativeBanner", tag);
+#endif 
+	}
 
     static void onQuit()
     {
