@@ -17,6 +17,7 @@ namespace IvySDK
 	typedef std::function<void(bool isSubmit, bool success, const char* leaderBoardId, const char* data)> onLeaderBoardResult;
 	typedef std::function<void(int resultCode, bool success, const char* data)> onServerResult;
 	typedef std::function<void(int tag, bool success, const char* data)> onCacheUrlResult;
+	typedef std::function<void(int adtype, const char* tag)> onAdshowdResult;
 	typedef std::function<void(int adtype, const char* tag)> onAdClickedResult;
 	typedef std::function<void(int adtype, const char* tag)> onAdClosedResult;
 	typedef std::function<void(const char* tag, bool success)> onAdLoadResult;
@@ -75,6 +76,7 @@ namespace IvySDK
     extern onLeaderBoardResult leaderBoardCallback_;
     extern onServerResult serverCallback_;
     extern onCacheUrlResult cacheCallback_;
+	extern onAdshowdResult adshowdCallback_;
 	extern onAdClickedResult adclickedCallback_;
 	extern onAdClosedResult adclosedCallback_;
 	extern onAdLoadResult adloadCallback_;
@@ -328,6 +330,34 @@ namespace IvySDK
         methodInfo.env->DeleteLocalRef(tag);
 #endif
     }
+	
+	static bool showNativeBanner(const char* tag, int xPrecent, int yPercent, const char* configFile)
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "showNativeBanner", "(Ljava/lang/String;IILjava/lang/String;)Z"))
+		{
+			CCLOG("%s%d: error to get methodInfo###################", __FILE__, __LINE__);
+			return false;
+		}
+		jstring tag1 = methodInfo.env->NewStringUTF(tag);
+		jstring tag2 = methodInfo.env->NewStringUTF(configFile);
+		bool result = methodInfo.env->CallStaticBooleanMethod(methodInfo.classID, methodInfo.methodID, tag1, xPrecent, yPercent, tag2);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(tag1);
+		methodInfo.env->DeleteLocalRef(tag2);
+		return result;
+#else
+		return false;
+#endif
+	}
+
+	static void closeNativeBanner(const char* tag)
+	{
+#if (CC_TARGET_PLATFORM==CC_PLATFORM_ANDROID)
+		callVoidUTFMethod("closeNativeBanner", tag);
+#endif 
+	}
 
     static void onQuit()
     {
@@ -631,6 +661,13 @@ namespace IvySDK
 #endif
     }
 
+	static void registerAdShowdCallback(onAdshowdResult callback)
+	{
+#if (IVY_SDK_PLATFORM == CC_PLATFORM_ANDROID)
+		adshowdCallback_ = callback;
+#endif
+	}
+
 	static void registerAdClickedCallback(onAdClickedResult callback)
 	{
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
@@ -798,6 +835,7 @@ extern "C"
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_lb(JNIEnv* env, jclass clazz, jboolean submit, jboolean success, jstring leaderBoardId, jstring ex);
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_sr(JNIEnv* env, jclass clazz, jint resultCode, jboolean success, jstring ex);
     JNIEXPORT void JNICALL Java_com_android_client_Cocos_url(JNIEnv* env, jclass clazz, jint tag, jboolean success, jstring ex);
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_aws(JNIEnv* env, jclass clazz, jint adType, jstring tag);
 	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awc(JNIEnv* env, jclass clazz, jint adType, jstring tag);
 	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awd(JNIEnv* env, jclass clazz, jint adType, jstring tag);
 	JNIEXPORT void JNICALL Java_com_android_client_Cocos_lar(JNIEnv* env, jclass clazz, jstring tag, jboolean success);

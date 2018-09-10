@@ -8,6 +8,7 @@ namespace IvySDK {
     onLeaderBoardResult leaderBoardCallback_;
     onServerResult serverCallback_;
     onCacheUrlResult cacheCallback_;
+	onAdshowdResult adshowdCallback_;
 	onAdClickedResult adclickedCallback_;
 	onAdClosedResult adclosedCallback_;
 	onAdLoadResult adloadCallback_;
@@ -70,6 +71,15 @@ extern "C" {
             IvySDK::cacheCallback_(tag, success, extra);
         }
     }
+
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_aws(JNIEnv* env, jclass clazz, jint adtype, jstring tag) {
+		CCLOG("receive url result: %d", tag);
+		if (IvySDK::adshowdCallback_ != nullptr) {
+			const char* extra = env->GetStringUTFChars(tag, 0);
+			env->DeleteLocalRef(tag);
+			IvySDK::adshowdCallback_(adtype, extra);
+		}
+	}
 
 	JNIEXPORT void JNICALL Java_com_android_client_Cocos_awc(JNIEnv* env, jclass clazz, jint adtype, jstring tag) {
 		CCLOG("receive url result: %d", tag);
