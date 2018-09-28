@@ -459,6 +459,27 @@ namespace IvySDK
         methodInfo.env->DeleteLocalRef(l);
 #endif
     }
+
+	static void logFinishLevel(const char* level)
+	{
+#if (CC_TARGET_PLATFORM==CC_PLATFORM_ANDROID)
+		callVoidUTFMethod("logFinishLevel", level);
+#endif 
+	}
+
+	static void logFinishAchievement(const char* achievement)
+	{
+#if (CC_TARGET_PLATFORM==CC_PLATFORM_ANDROID)
+		callVoidUTFMethod("logFinishAchievement", achievement);
+#endif 
+	}
+
+	static void logFinishTutorial(const char* tutorial)
+	{
+#if (CC_TARGET_PLATFORM==CC_PLATFORM_ANDROID)
+		callVoidUTFMethod("logFinishTutorial", tutorial);
+#endif 
+	}
     
     static void share()
     {

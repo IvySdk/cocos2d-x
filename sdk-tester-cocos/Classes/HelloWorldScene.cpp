@@ -154,6 +154,9 @@ bool HelloWorld::init() {
     IvySDK::registerCacheUrlCallback(onCacheUrlResult);
 //    IvySDK::registerLeaderBoardCallback(onReceiveLeaderboardResult);
     IvySDK::registerServerCallback(onReceiveServerResult);
+	IvySDK::registerAdClosedCallback([](int adtype, const char* tag) {
+		CCLOG("<<<<<<<%d_%s>>>>>>>>>>>", adtype, tag);
+	});
 
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	auto origin = Director::getInstance()->getVisibleOrigin();
@@ -175,7 +178,7 @@ bool HelloWorld::init() {
 	float px = origin.x + 40;
 
 	ccMenuCallback handler = CC_CALLBACK_1(HelloWorld::AdButtonClicked, this);
-    const int label_size = 38;
+    const int label_size = 41;
     const char* labels[label_size] = {
         "Pause AD", // 1
         "PassLevel",// 2
@@ -214,7 +217,10 @@ bool HelloWorld::init() {
 		"UM_PlayerLevel",//35
 		"UM_PageStart",//36
 		"UM_PageEnd",//37
-		"UM_onEvent"//38
+		"UM_onEvent",//38
+		"logFinishLevel",//39
+		"logFinishAchievement",//40
+		"logFinishTutorial"//41
     };
     
     int xOffset = 0;
@@ -357,11 +363,21 @@ void HelloWorld::AdButtonClicked(Ref* ref) {
 			IvySDK::UM_onPageEnd("mainPage");
 			break;
 		case 38:
-			IvySDK::UM_onEvent("button1", "onclick");
+			//IvySDK::UM_onEvent("button1", "onclick");
+			break;
+		case 39:
+			IvySDK::logFinishLevel("level_1");
+			break;
+		case 40:
+			IvySDK::logFinishAchievement("chieve_1");
+			break;
+		case 41:
+			IvySDK::logFinishTutorial("tutorial_1");
 			break;
 	default:
 		break;
 	}
+
 }
 
 void HelloWorld::menuCloseCallback(Ref* sender) {
@@ -373,6 +389,7 @@ void HelloWorld::menuCloseCallback(Ref* sender) {
 #endif
 	IvySDK::onQuit();
 	//Director::getInstance()->end();
+
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
 	exit(0);
