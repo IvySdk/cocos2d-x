@@ -286,7 +286,7 @@ namespace IvySDK
     static bool hasNativeAd(const char* nativeTag) {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
         JniMethodInfo methodInfo;
-        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "hasNative", "(Ljava/lang/String;)V"))
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "hasNative", "(Ljava/lang/String;)Z"))
         {
             CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
             return false;
