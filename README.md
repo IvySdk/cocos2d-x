@@ -46,7 +46,7 @@
 * 如果您有使用proguard来混淆Java代码，需要添加以下规则：
 ```java
 -dontwarn com.unity3d.**
--keep class com.android.client.** {
+-keep class com.android.** {
     <methods>;
 }
 
