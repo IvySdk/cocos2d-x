@@ -29,7 +29,7 @@ extern "C" {
         CCLOG("payment system valid");
     }
     
-    JNIEXPORT void JNICALL Java_com_android_client_Cocos_rr(JNIEnv* env, jclass clazz, jboolean success, jint rewardId) {
+    JNIEXPORT void JNICALL Java_com_android_client_Cocos_rr(JNIEnv* env, jclass clazz, jboolean success, jint rewardId, jstring tag, jboolean skip) {
         CCLOG("receive free coins");
         if (IvySDK::rewardAdCallback_ != nullptr)
             IvySDK::rewardAdCallback_(success, rewardId);
