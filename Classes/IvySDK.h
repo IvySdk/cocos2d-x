@@ -440,6 +440,41 @@ namespace IvySDK
 		methodInfo.env->DeleteLocalRef(a);
 #endif
 	}
+	
+	static void trackEvent(const char* event) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+	    const char* data = "default,default";
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "trackEvent", "(Ljava/lang/String;Ljava/lang/String;)V"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return;
+        }
+        jstring c = methodInfo.env->NewStringUTF(event);
+        jstring a = methodInfo.env->NewStringUTF(data);
+        methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, c, a);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(c);
+        methodInfo.env->DeleteLocalRef(a);
+#endif
+    }
+	
+	static void trackEvent(const char* event, const char* data) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "trackEvent", "(Ljava/lang/String;Ljava/lang/String;)V"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return;
+		}
+		jstring c = methodInfo.env->NewStringUTF(event);
+		jstring a = methodInfo.env->NewStringUTF(data);
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, c, a);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(c);
+		methodInfo.env->DeleteLocalRef(a);
+#endif
+	}
     
     static void trackEvent(const char* category, const char* action, const char* label, int value) {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
