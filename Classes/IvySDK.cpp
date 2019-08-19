@@ -123,6 +123,15 @@ extern "C" {
 			IvySDK::receiveBillPricesCallback_(extra);
 		}
 	}
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_hal(JNIEnv* env, jclass clazz, jboolean success){
+
+	}
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_gr(JNIEnv* env, jclass clazz, jint achieveTag, jboolean success){
+		
+	}
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_nd(JNIEnv* env, jclass clazz, jstring data) {
+		
+	}
 #ifdef __cplusplus
 }
 #endif

@@ -352,6 +352,26 @@ namespace IvySDK
 #endif
 	}
 
+	static bool showNativeBanner(const char* tag, int x, int y, int w, int h, const char* configFile)
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "showNativeBanner", "(Ljava/lang/String;IIIILjava/lang/String;)Z"))
+		{
+			CCLOG("%s%d: error to get methodInfo###################", __FILE__, __LINE__);
+			return false;
+		}
+		jstring tag1 = methodInfo.env->NewStringUTF(tag);
+		jstring tag2 = methodInfo.env->NewStringUTF(configFile);
+		bool result = methodInfo.env->CallStaticBooleanMethod(methodInfo.classID, methodInfo.methodID, tag1, x, y, w, h, tag2);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(tag1);
+		methodInfo.env->DeleteLocalRef(tag2);
+		return result;
+#endif
+		return false;
+	}
+
 	static void closeNativeBanner(const char* tag)
 	{
 #if (CC_TARGET_PLATFORM==CC_PLATFORM_ANDROID)
@@ -375,6 +395,84 @@ namespace IvySDK
         return callBooleanMethod("isNetworkConnected");
 #else
         return false;
+#endif
+	}
+
+	static bool isDeliciousAdAvailable()
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		return callBooleanMethod("hasDeliciousIconAd");
+#endif
+		return false;
+	}
+
+	static void showDeliciousInterstitialAd(const char *  json)
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "showDeliciousInterstitialAd", "(Ljava/lang/String;)V"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return;
+		}
+		jstring path = methodInfo.env->NewStringUTF(json);
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, path);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(path);
+#endif
+	}
+
+	static bool hasDeliciousBannerAd()
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		return callBooleanMethod("hasDeliciousBannerAd");
+#endif
+		return false;
+	}
+
+	static void showDeliciousBannerAd(int x, int y, int w, int h, const char *  json)
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "showDeliciousBannerAd", "(IIIILjava/lang/String;)V"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return;
+		}
+		jstring path = methodInfo.env->NewStringUTF(json);
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, x, y, w, h, path);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(path);
+#endif
+	}
+
+	static void closeDeliciousBannerAd()
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		callVoidMethod("closeDeliciousBannerAd");
+#endif
+	}
+
+	static void showDeliciousIconAd(int x, int y, int w, int h, const char *  json)
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "showDeliciousIconAd", "(IIIILjava/lang/String;)V"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return;
+		}
+		jstring path = methodInfo.env->NewStringUTF(json);
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, x, y, w, h, path);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(path);
+#endif
+	}
+
+	static void closeDeliciousIconAd()
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		callVoidMethod("closeDeliciousIconAd");
 #endif
 	}
 	
@@ -877,6 +975,129 @@ namespace IvySDK
 		methodInfo.env->DeleteLocalRef(a);
 #endif
 	}
+
+	static void setUserTag(const char* useTag) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		callVoidUTFMethod("setUserTag", useTag);
+#endif
+	}
+
+	static void setUserProperty(const char* key, const char* value) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "setUserProperty", "(Ljava/lang/String;Ljava/lang/String;)V"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return;
+		}
+		jstring key_ = methodInfo.env->NewStringUTF(key);
+		jstring value_ = methodInfo.env->NewStringUTF(value);
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, key_, value_);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(key_);
+		methodInfo.env->DeleteLocalRef(value_);
+#endif
+	}
+
+	static void pushLocalMessage(const char* key, const char* title, const char* content, int pushTime, int interval, bool useSound, const char* soundName, const char* userInfo) {
+#if(CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "pushLocalMessage", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IIZLjava/lang/String;Ljava/lang/String;)V"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return;
+		}
+		jstring key_ = methodInfo.env->NewStringUTF(key);
+		jstring title_ = methodInfo.env->NewStringUTF(title);
+		jstring content_ = methodInfo.env->NewStringUTF(content);
+		jstring soundName_ = methodInfo.env->NewStringUTF(soundName);
+		jstring userInfo_ = methodInfo.env->NewStringUTF(userInfo);
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, key_, title_, content_, pushTime, interval, useSound, soundName_, userInfo_);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(key_);
+		methodInfo.env->DeleteLocalRef(title_);
+		methodInfo.env->DeleteLocalRef(content_);
+		methodInfo.env->DeleteLocalRef(soundName_);
+		methodInfo.env->DeleteLocalRef(userInfo_);
+#endif
+	}
+
+	static int getRemoteConfigInt(const char* key, int defaultValue = 0) {
+#if(CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "getRemoteConfigInt", "(Ljava/lang/String;)I"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return 0;
+		}
+		jstring key_ = methodInfo.env->NewStringUTF(key);
+		int result = methodInfo.env->CallStaticIntMethod(methodInfo.classID, methodInfo.methodID, key_);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(key_);
+		return result;
+#endif
+		return defaultValue;
+	}
+
+	static long getRemoteConfigLong(const char* key, long defaultValue = 0L) {
+#if(CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "getRemoteConfigLong", "(Ljava/lang/String;)J"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return 0;
+		}
+		jstring key_ = methodInfo.env->NewStringUTF(key);
+		long result = methodInfo.env->CallStaticLongMethod(methodInfo.classID, methodInfo.methodID, key_);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(key_);
+		return result;
+#endif
+		return defaultValue;
+	}
+
+	static double getRemoteConfigDouble(const char* key, double defaultValue = 0.0) {
+#if(CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "getRemoteConfigDouble", "(Ljava/lang/String;)D"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return 0.0;
+		}
+		jstring key_ = methodInfo.env->NewStringUTF(key);
+		double result = methodInfo.env->CallStaticDoubleMethod(methodInfo.classID, methodInfo.methodID, key_);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(key_);
+		return result;
+#endif
+		return defaultValue;
+	}
+
+	static bool getRemoteConfigBoolean(const char* key, bool defaultValue = false) {
+#if(CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		return callBooleanUTFMethod("getRemoteConfigBoolean", key);
+#endif
+		return defaultValue;
+	}
+
+	static const char* getRemoteConfigString(const char* key, const char* defaultValue = NULL) {
+#if(CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "getRemoteConfigString", "(Ljava/lang/String;)Ljava/lang/String;"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return "";
+		}
+		jstring key_ = methodInfo.env->NewStringUTF(key);
+		jstring result = (jstring)methodInfo.env->CallStaticObjectMethod(methodInfo.classID, methodInfo.methodID, key_);
+		const char* cs = methodInfo.env->GetStringUTFChars(result, 0);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(key_);
+		methodInfo.env->DeleteLocalRef(result);
+		return cs;
+#endif
+		return defaultValue;
+	}
 }
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
@@ -897,6 +1118,9 @@ extern "C"
 	JNIEXPORT void JNICALL Java_com_android_client_Cocos_lar(JNIEnv* env, jclass clazz, jstring tag, jboolean success);
 	JNIEXPORT void JNICALL Java_com_android_client_Cocos_pe(JNIEnv* env, jclass clazz, jstring error);
 	JNIEXPORT void JNICALL Java_com_android_client_Cocos_ps(JNIEnv* env, jclass clazz, jstring prices);
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_hal(JNIEnv* env, jclass clazz, jboolean success);
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_gr(JNIEnv* env, jclass clazz, jint userTag, jboolean success);
+	JNIEXPORT void JNICALL Java_com_android_client_Cocos_nd(JNIEnv* env, jclass clazz, jstring data);
 #ifdef __cplusplus
 }
 #endif
