@@ -627,6 +627,10 @@ namespace IvySDK
     static void rateUs() {
         callVoidMethod("rate");
     }
+	
+    static void support(const char* email, const char* extra) {
+        callVoidMethod("rate");
+    }
     
     static const char* getExtraData() {
         return callUTFMethod("getExtraData", "{}");
@@ -772,14 +776,14 @@ namespace IvySDK
 #endif
     }
     
-	//注册支付回调函数
+	//娉ㄥ唽鏀粯鍥炶皟鍑芥暟
     static void registerPaymentCallback(onPaymentResult callback)
     {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
         paymentCallback_ = callback;
 #endif
     }
-    //注册展示视频广告回调
+    //娉ㄥ唽灞曠ず瑙嗛骞垮憡鍥炶皟
     static void registerRewardAdCallback(onRewardAdResult callback)
     {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
