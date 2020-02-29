@@ -111,6 +111,23 @@ namespace IvySDK
         methodInfo.env->DeleteLocalRef(tag);
 #endif
     }
+
+        static void callVoidUTFMethod2(const char* method, const char* p, const char* p2) {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, method, "(Ljava/lang/String;Ljava/lang/String;)V"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return;
+        }
+        jstring tag = methodInfo.env->NewStringUTF(p);
+        jstring tag2 = methodInfo.env->NewStringUTF(p2);
+        methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, tag, tag2);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(tag);
+        methodInfo.env->DeleteLocalRef(tag2);
+#endif
+    }
     
     static bool callBooleanMethod(const char* method) {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
@@ -629,7 +646,7 @@ namespace IvySDK
     }
 	
     static void support(const char* email, const char* extra) {
-        callVoidMethod("rate");
+        callVoidUTFMethod2("support", email, extra);
     }
     
     static const char* getExtraData() {
