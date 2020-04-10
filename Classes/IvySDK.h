@@ -503,6 +503,25 @@ namespace IvySDK
     {
         return callBooleanMethod("hasRewardAd");
     }
+	
+	static bool hasFull(const char* tag)
+    {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        JniMethodInfo methodInfo;
+        if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "hasFull", "(Ljava/lang/String;)Z"))
+        {
+            CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+            return false;
+        }
+        jstring t = methodInfo.env->NewStringUTF(tag);
+        bool result = methodInfo.env->CallStaticBooleanMethod(methodInfo.classID, methodInfo.methodID, t);
+        methodInfo.env->DeleteLocalRef(methodInfo.classID);
+        methodInfo.env->DeleteLocalRef(t);
+        return result;
+#else
+        return false;
+#endif
+    }
     
     static void showRewardAd(const char* tag, int rewardId)
     {
