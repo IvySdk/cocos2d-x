@@ -247,6 +247,23 @@ namespace IvySDK
 		methodInfo.env->DeleteLocalRef(tag);
 #endif
 	}
+	
+	
+	static void showPromoteAd(const char* pos)
+	{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+		JniMethodInfo methodInfo;
+		if (!JniHelper::getStaticMethodInfo(methodInfo, sdkClassName_, "showPromoteAd", "(Ljava/lang/String;)V"))
+		{
+			CCLOG("%s %d: error to get methodInfo", __FILE__, __LINE__);
+			return;
+		}
+		jstring tag = methodInfo.env->NewStringUTF(pos);
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, tag);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		methodInfo.env->DeleteLocalRef(tag);
+#endif
+	}
 
 	static void loadFullAd(const char* pos)
 	{
